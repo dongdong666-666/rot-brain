@@ -76,7 +76,7 @@ export const DIMENSION_MAP: Record<DimensionKey, Dimension> = DIMENSIONS.reduce(
   {} as Record<DimensionKey, Dimension>,
 )
 
-/** 每个维度的题目数量 */
+/** 每轮从每个维度抽取的题数；与题库每维度12题分开。 */
 export const QUESTIONS_PER_DIMENSION = 4
 /** 每题最低分 / 最高分 */
 export const MIN_OPTION_SCORE = 1
