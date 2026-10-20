@@ -9,15 +9,15 @@ interface HomeProps {
   onStart: () => void
   onContinue: () => void
   answeredCount: number
-  hasSession: boolean
+  hasPendingSession: boolean
   /** 上一次的测试结果，存在时展示「查看上次结果」入口 */
   lastResult: TestResult | null
   onViewLastResult: () => void
 }
 
-export default function Home({ onStart, onContinue, answeredCount, hasSession, lastResult, onViewLastResult }: HomeProps) {
+export default function Home({ onStart, onContinue, answeredCount, hasPendingSession, lastResult, onViewLastResult }: HomeProps) {
   const [confirmRestart, setConfirmRestart] = useState(false)
-  const hasUnfinished = hasSession && answeredCount < TOTAL_QUESTIONS
+  const hasUnfinished = hasPendingSession
   return (
     <div className="page page--home">
       {/* ---------- Hero ---------- */}
@@ -55,7 +55,7 @@ export default function Home({ onStart, onContinue, answeredCount, hasSession, l
         <p className="hero__random-note">五个维度各抽 {QUESTIONS_PER_DIMENSION} 题 · 题序和选项随机排列 · 刷新续答</p>
         <button type="button" className="btn btn--primary btn--xl" onClick={hasUnfinished ? onContinue : onStart}>
           <span className="btn__emoji">🫠</span>
-          {hasUnfinished ? '继续上次测试（' + answeredCount + '/' + TOTAL_QUESTIONS + '）' : lastResult ? '重新抽题再测一次' : '随机抽题，开始测试'}
+          {hasUnfinished ? answeredCount === TOTAL_QUESTIONS ? '检查答案并提交' : '继续上次测试（' + answeredCount + '/' + TOTAL_QUESTIONS + '）' : lastResult ? '重新抽题再测一次' : '随机抽题，开始测试'}
         </button>
         {hasUnfinished && !confirmRestart && (
           <button type="button" className="restart-link" onClick={() => setConfirmRestart(true)}>重新抽取20题</button>

@@ -256,6 +256,8 @@ check('非法答案不能计为已答完', invalidValues.every(value => {
 section('【10】题组、选项与当前位置恢复')
 const progress = {...randomRound,answers:randomAnswers,current:7}
 check('JSON往返保留整轮题目、选项、答案和位置', parseSession(JSON.parse(JSON.stringify(progress))), progress)
+check('正式提交时间可以持久恢复',parseSession({...progress,completedAt:2000})?.completedAt,2000)
+check('非法提交时间不复用',parseSession({...progress,completedAt:'wrong'}),null)
 check('题库版本错误不复用', parseSession({...progress,bankVersion:'unknown'}), null)
 check('越界位置拒绝恢复', parseSession({...progress,current:20}), null)
 check('重复选项排列拒绝恢复', parseSession({...progress,optionOrders:{...progress.optionOrders,[progress.questionIds[0]]:[0,0,2]}}), null)

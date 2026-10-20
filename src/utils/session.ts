@@ -11,6 +11,8 @@ export interface QuizSession {
   answers: AnswerMap
   current: number
   startedAt: number
+  /** 首次正式提交后记录；答完但未提交时仍允许继续。 */
+  completedAt?: number
 }
 
 /** Fisher–Yates；只用于抽题与顺序，绝不参与计分。 */
@@ -72,6 +74,7 @@ export function parseSession(input: unknown): QuizSession | null {
   if (raw.version !== 2 || raw.bankVersion !== QUESTION_BANK_VERSION || !isValidQuestionSet(raw.questionIds)) return null
   if (!Number.isInteger(raw.current) || raw.current! < 0 || raw.current! >= TOTAL_QUESTIONS) return null
   if (typeof raw.startedAt !== 'number' || !Number.isFinite(raw.startedAt) || raw.startedAt <= 0) return null
+  if (raw.completedAt !== undefined && (typeof raw.completedAt !== 'number' || !Number.isFinite(raw.completedAt) || raw.completedAt <= 0)) return null
   if (!raw.optionOrders || typeof raw.optionOrders !== 'object' || Array.isArray(raw.optionOrders)) return null
   const optionOrders: Record<number, number[]> = {}
   for (const id of raw.questionIds) {
@@ -84,6 +87,7 @@ export function parseSession(input: unknown): QuizSession | null {
     version: 2, bankVersion: QUESTION_BANK_VERSION, questionIds: [...raw.questionIds],
     optionOrders, answers: sanitizeAnswers(raw.answers, raw.questionIds),
     current: raw.current!, startedAt: raw.startedAt,
+    ...(raw.completedAt === undefined ? {} : { completedAt: raw.completedAt }),
   }
 }
 

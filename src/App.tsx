@@ -3,17 +3,22 @@ import Home from './components/Home'
 import Quiz from './components/Quiz'
 import Result from './components/Result'
 import { ToastHost, useToast } from './components/Toast'
-import { calculateResult, getAnsweredCount, type TestResult } from './utils/scoring'
+import { calculateResult, getAnsweredCount, isComplete, type TestResult } from './utils/scoring'
 import { createSession, isValidAnswer, type QuizSession } from './utils/session'
 import { loadResult, loadSession, loadStage, saveResult, saveSession, saveStage, type Stage } from './utils/storage'
 
 function loadInitialState() {
-  const session = loadSession()
+  let session = loadSession()
   const result = loadResult()
   const storedStage = loadStage()
+  if (session && result && storedStage === 'result' && !session.completedAt &&
+      calculateResult(session.answers, session.questionIds)?.total === result.total) {
+    session = { ...session, completedAt: result.createdAt }
+  }
   let stage: Stage = 'home'
   if (storedStage === 'quiz' && session) stage = 'quiz'
   else if (storedStage === 'result' && result) stage = 'result'
+  else if (storedStage === 'result' && session) stage = 'quiz'
   return { session, result, stage }
 }
 export default function App() {
@@ -37,7 +42,7 @@ export default function App() {
   const handleSelect = useCallback((questionId: number, optionIndex: number) => {
     if (!isValidAnswer(questionId, optionIndex)) return
     setSession((previous) => previous && previous.questionIds.includes(questionId)
-      ? { ...previous, answers: { ...previous.answers, [questionId]: optionIndex } } : previous)
+      ? { ...previous, completedAt: undefined, answers: { ...previous.answers, [questionId]: optionIndex } } : previous)
   }, [])
   const handleNavigate = useCallback((current: number) => {
     setSession((previous) => previous && Number.isInteger(current) && current >= 0 && current < previous.questionIds.length
@@ -48,6 +53,7 @@ export default function App() {
     const nextResult = calculateResult(session.answers, session.questionIds)
     if (!nextResult) { notify('还有题目没答完，无法生成结果', 'info'); return }
     setResult(nextResult)
+    setSession({ ...session, completedAt: nextResult.createdAt })
     setStage('result')
   }, [session, notify])
   const handleHome = useCallback(() => setStage('home'), [])
@@ -70,7 +76,7 @@ export default function App() {
       <main className="main">
         {storageIssue && <p className="storage-warning" role="status">当前浏览器无法保存进度，本轮仍可完成；刷新或关闭页面后可能丢失。</p>}
         {stage === 'home' && <Home onStart={handleStart} onContinue={handleContinue}
-          answeredCount={answeredCount} hasSession={session !== null}
+          answeredCount={answeredCount} hasPendingSession={session !== null && (!session.completedAt || !isComplete(session.answers, session.questionIds))}
           lastResult={result} onViewLastResult={handleViewLastResult} />}
         {stage === 'quiz' && session && <Quiz session={session} onSelect={handleSelect}
           onNavigate={handleNavigate} onFinish={handleFinish} onExit={handleHome} notify={notify} />}
