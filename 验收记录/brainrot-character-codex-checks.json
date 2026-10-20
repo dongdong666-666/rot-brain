@@ -1,0 +1,63 @@
+{
+  "cards": 8,
+  "layouts": [
+    {
+      "cards": 8,
+      "columns": "132.333px 132.333px",
+      "headerInBounds": true,
+      "scrollWidth": 305,
+      "width": 305
+    },
+    {
+      "cards": 8,
+      "columns": "167.333px 167.333px",
+      "headerInBounds": true,
+      "scrollWidth": 375,
+      "width": 375
+    },
+    {
+      "cards": 8,
+      "columns": "168.167px 168.167px 168.167px 168.167px",
+      "headerInBounds": true,
+      "scrollWidth": 753,
+      "width": 753
+    },
+    {
+      "cards": 8,
+      "columns": "200px 200px 200px 200px",
+      "headerInBounds": true,
+      "scrollWidth": 1425,
+      "width": 1425
+    }
+  ],
+  "quizBefore": {
+    "counter": "第 2 / 20 题",
+    "options": [
+      "大部分能懂，个别词需要想一想",
+      "需要看上下文或查一下意思",
+      "几乎不用翻译，还能顺手接出下一句"
+    ],
+    "title": "你通常能接住多少？"
+  },
+  "quizAfter": {
+    "counter": "第 2 / 20 题",
+    "options": [
+      "大部分能懂，个别词需要想一想",
+      "需要看上下文或查一下意思",
+      "几乎不用翻译，还能顺手接出下一句"
+    ],
+    "title": "你通常能接住多少？"
+  },
+  "quizRestored": true,
+  "resultBefore": {
+    "name": "数字净土人",
+    "portrait": "/rot-brain/characters/pure.webp",
+    "score": "22 / 60"
+  },
+  "resultAfter": {
+    "name": "数字净土人",
+    "portrait": "/rot-brain/characters/pure.webp",
+    "score": "22 / 60"
+  },
+  "resultUnchanged": true
+}

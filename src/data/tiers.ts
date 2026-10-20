@@ -1,7 +1,9 @@
 /**
- * 八个脑腐段位配置。
+ * 八个脑腐段位（人物）配置。
  * 总分范围 20—60，区间依次为：
  * 20—24、25—29、30—34、35—39、40—44、45—49、50—54、55—60。
+ * 名称、英文名、图标、评语、介绍与画像必须保持主题一致：
+ * 结果卡、人物图鉴、首页举例、分享摘要、分享图与下载文件名都只从本文件读取。
  * 修改名称、评语、描述或图形，只需改动本文件。
  */
 
@@ -48,13 +50,13 @@ export const TIERS: Tier[] = [
     level: 2,
     min: 25,
     max: 29,
-    name: '浅尝辄止体',
+    name: '互联网观光客',
     portrait: 'characters/tourist.webp',
-    enName: 'Light Dipper',
-    icon: '🌱',
-    tagline: '偶尔刷刷，随时能放下',
+    enName: 'Internet Tourist',
+    icon: '🧳',
+    tagline: '路过看看，不打算久留',
     description:
-      '你会刷，也会笑，但手机还没能替你做决定。你的信息食谱还算均衡，偶尔的走神更像是休息，而不是失控。保持住这个节奏就好。',
+      '你像逛景点一样路过信息流：会停下来看看热闹，也会按时离开。热门内容对你来说是橱窗，不是住处。保持这份好奇心，也记得你随时可以走出这条街。',
     color: '#34d399',
     color2: '#10b981',
   },
@@ -62,13 +64,13 @@ export const TIERS: Tier[] = [
     level: 3,
     min: 30,
     max: 34,
-    name: '轻度腌制体',
+    name: '轻度腌制人',
     portrait: 'characters/casual.webp',
     enName: 'Lightly Pickled',
     icon: '🥒',
-    tagline: '有点入味，还能抢救',
+    tagline: '刚撒上盐，还能抢救',
     description:
-      '你已经被算法腌上了一层薄薄的底味：刷着刷着时间就没了，说话偶尔蹦出两句黑话。整体还算可控，只是那些「就五分钟」正在悄悄累积。',
+      '你已经被算法撒了一层薄薄的盐：刷着刷着时间就没了，说话偶尔蹦出两句黑话。整体还很可控，只是那些「就五分钟」正在悄悄累积。',
     color: '#a3e635',
     color2: '#84cc16',
   },
@@ -76,13 +78,13 @@ export const TIERS: Tier[] = [
     level: 4,
     min: 35,
     max: 39,
-    name: '半熟冲浪手',
+    name: '中度入味体',
     portrait: 'characters/marinated.webp',
-    enName: 'Half-Baked Surfer',
-    icon: '🍳',
-    tagline: '刷功熟练，专注力时好时坏',
+    enName: 'Half Marinated',
+    icon: '🧂',
+    tagline: '腌到一半，味道已经进去了',
     description:
-      '你已经很熟悉互联网的节奏，甚至能在信息流里如鱼得水。但注意力开始有了明显的波动：有些日子能沉下去，有些日子一整天都浮在表面。',
+      '调味料已经渗进去了：热门梗你会接，短视频也能刷上一阵。你开始注意到有些习惯是「被喂出来的」，还好还想得起来把手机放下。',
     color: '#fbbf24',
     color2: '#f59e0b',
   },
@@ -90,13 +92,13 @@ export const TIERS: Tier[] = [
     level: 5,
     min: 40,
     max: 44,
-    name: '深度入味体',
+    name: '充分煮熟体',
     portrait: 'characters/cooked.webp',
-    enName: 'Deeply Marinated',
-    icon: '🍜',
-    tagline: '味道进去了，习惯也进去了',
+    enName: 'Well Cooked',
+    icon: '🍲',
+    tagline: '火候到了，习惯也跟着定型',
     description:
-      '短视频、梗和热搜已经渗透进你的日常缝隙。你不是不知道自己在刷，只是手比脑子快。如果想专注时总想切回信息流，可以试着留一小段不刷内容的空档，看看自己的感受。',
+      '火候到了，味道和习惯一起定了型：短视频、梗和热搜已经渗进日常缝隙，手常常比脑子快一步。如果想专注时总想切回信息流，可以试着留一小段不刷内容的空档，看看自己的感受。',
     color: '#fb923c',
     color2: '#f97316',
   },
@@ -104,13 +106,13 @@ export const TIERS: Tier[] = [
     level: 6,
     min: 45,
     max: 49,
-    name: '重度发酵体',
+    name: '油炸酥脆体',
     portrait: 'characters/deepfried.webp',
-    enName: 'Fully Fermented',
-    icon: '🫧',
-    tagline: '情绪跟着 feed 上下浮动',
+    enName: 'Deep Fried',
+    icon: '🍗',
+    tagline: '外酥里也酥，热度有点高',
     description:
-      '你的情绪节奏已经和信息流高度同步：刷到什么，今天就有点像什么。安静下来会不自在，长内容变得难以下咽。别急着否定自己，先从一个小缝隙开始透透气。',
+      '热度有点高，外酥里也酥：注意力在高温里变得又脆又碎，长内容像被炸干了一样难以下咽。别急着否定自己，先把火关小一点，给自己留一个降温的窗口。',
     color: '#f472b6',
     color2: '#ec4899',
   },
@@ -118,13 +120,13 @@ export const TIERS: Tier[] = [
     level: 7,
     min: 50,
     max: 54,
-    name: '算法共生体',
+    name: '发酵变异体',
     portrait: 'characters/fermented.webp',
-    enName: 'Algorithm Symbiote',
-    icon: '🛸',
-    tagline: '你和推荐系统已经互相驯化',
+    enName: 'Fermented Mutant',
+    icon: '🦠',
+    tagline: '在信息流里泡出了新性状',
     description:
-      '你的品味、表达和情绪，都和推荐系统长在了一起。你刷到的东西越来越像你，你也越来越像你刷到的东西。这是一段共生关系，随时可以重新谈判。',
+      '在信息流里泡得够久，你已经发酵出了一些新性状：表达带梗、情绪跟着 feed 走、安静下来会发慌。这不是不可逆的变异，换个环境，菌种也会跟着变。',
     color: '#c084fc',
     color2: '#a855f7',
   },
@@ -147,6 +149,14 @@ export const TIERS: Tier[] = [
 /** 总分下限 / 上限（20 道题，每题 1—3 分） */
 export const TOTAL_MIN = 20
 export const TOTAL_MAX = 60
+
+/**
+ * 首页举例引用的三档人物。
+ * 页面文案一律从这里取名字，避免在各处硬编码出不一致的称呼。
+ */
+export const FEATURED_TIER_LOW = TIERS[0]
+export const FEATURED_TIER_MID = TIERS[3]
+export const FEATURED_TIER_HIGH = TIERS[TIERS.length - 1]
 
 /** 兜底段位：分数异常时返回最低段位 */
 const FALLBACK_TIER = TIERS[0]

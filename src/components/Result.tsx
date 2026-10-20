@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { DISCLAIMER, DISCLAIMER_LONG } from '../data/advice'
+import { ADVICE_NOTE, DISCLAIMER, DISCLAIMER_LONG } from '../data/advice'
 import { TOTAL_MAX, TOTAL_MIN } from '../data/tiers'
 import type { TestResult } from '../utils/scoring'
 import {
@@ -10,16 +10,18 @@ import {
   renderResultImage,
 } from '../utils/share'
 import ShareModal from './ShareModal'
+import CopyFallbackModal from './CopyFallbackModal'
 import { getPortraitUrl } from '../utils/portraits'
 
 interface ResultProps {
   result: TestResult
   onRetest: () => void
   onHome: () => void
+  onOpenCodex: () => void
   notify: (message: string, kind?: 'success' | 'error' | 'info') => void
 }
 
-export default function Result({ result, onRetest, onHome, notify }: ResultProps) {
+export default function Result({ result, onRetest, onHome, onOpenCodex, notify }: ResultProps) {
   const { tier, total, progress, dimensions, topDimensions, hasTie, advice } = result
 
   const [copied, setCopied] = useState(false)
@@ -28,7 +30,11 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
   const [modalOpen, setModalOpen] = useState(false)
   const [revealed, setRevealed] = useState(false)
   const [portraitFailed, setPortraitFailed] = useState(false)
+  const [manualCopy, setManualCopy] = useState<{ title: string; hint: string } | null>(null)
   const barsRef = useRef<HTMLDivElement | null>(null)
+  const copyButtonRef = useRef<HTMLButtonElement | null>(null)
+  const shareButtonRef = useRef<HTMLButtonElement | null>(null)
+  const manualCopyTriggerRef = useRef<HTMLElement | null>(null)
 
   // 进度条入场动画
   useEffect(() => {
@@ -36,12 +42,22 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
     return () => window.clearTimeout(t)
   }, [])
 
-  // 结果变化时重置分享图缓存
+  // 结果变化时重置分享图与复制状态，避免残留上一次的摘要
   useEffect(() => {
     setImageUrl('')
     setCopied(false)
     setPortraitFailed(false)
+    setManualCopy(null)
   }, [result.createdAt])
+
+  /** 打开手动复制窗口；摘要始终由当前 result 现场生成。 */
+  const openManualCopy = useCallback(
+    (title: string, hint: string, trigger: HTMLElement | null) => {
+      manualCopyTriggerRef.current = trigger
+      setManualCopy({ title, hint })
+    },
+    [],
+  )
 
   const handleCopy = useCallback(async () => {
     const text = buildSummary(result)
@@ -50,10 +66,15 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
       setCopied(true)
       notify('结果摘要已复制到剪贴板', 'success')
       window.setTimeout(() => setCopied(false), 2400)
-    } else {
-      notify('复制失败，请手动选择文本复制', 'error')
+      return
     }
-  }, [result, notify])
+    notify('自动复制失败，已打开手动复制窗口', 'error')
+    openManualCopy(
+      '手动复制结果摘要',
+      '自动复制没有成功。下面是本次完整的结果摘要，可以全选或长按后复制。',
+      copyButtonRef.current,
+    )
+  }, [result, notify, openManualCopy])
 
   const ensureImage = useCallback(async (): Promise<string | null> => {
     if (imageUrl) return imageUrl
@@ -76,15 +97,19 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
     if (!url) return
 
     if (canAutoDownload()) {
-      const ok = downloadDataUrl(url, `脑腐指数-${tier.name}-${total}分.png`)
-      notify(ok ? '分享图已保存到下载文件夹' : '保存失败，可长按预览图保存', ok ? 'success' : 'error')
-      if (!ok) setModalOpen(true)
+      // 只能确认「发起了下载」，不能确认文件已落到用户的下载文件夹
+      if (downloadDataUrl(url, `脑腐指数-${tier.name}-${total}分.png`)) {
+        notify('已发起图片下载，请查看浏览器下载列表。', 'success')
+        return
+      }
+      notify('浏览器没有触发下载，已打开预览，可长按图片保存', 'error')
+      setModalOpen(true)
       return
     }
 
     // 移动端：弹出预览，提示长按保存
     setModalOpen(true)
-    notify('已生成分享图，长按即可保存', 'success')
+    notify('已生成分享图，长按图片即可保存', 'success')
   }, [ensureImage, notify, tier.name, total])
 
   const handleShareLink = useCallback(async () => {
@@ -106,8 +131,17 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
       console.warn('系统分享失败，回退到复制：', err)
     }
     const ok = await copyText(text)
-    notify(ok ? '当前环境不支持分享，已改为复制摘要' : '分享失败，请手动复制', ok ? 'success' : 'error')
-  }, [result, notify])
+    if (ok) {
+      notify('当前环境不支持分享，已改为复制摘要', 'success')
+      return
+    }
+    notify('分享和自动复制都失败了，已打开手动复制窗口', 'error')
+    openManualCopy(
+      '手动复制结果摘要',
+      '系统分享和自动复制都没有成功。下面是本次完整的结果摘要，可以全选或长按后复制。',
+      shareButtonRef.current,
+    )
+  }, [result, notify, openManualCopy])
 
   return (
     <div className="page page--result">
@@ -234,7 +268,8 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
       <section className="section section--tight">
         <h2 className="section__title section__title--left">🧾 脑腐处方笺</h2>
         <p className="section__subtitle section__subtitle--left">
-          针对你得分较高的维度，挑一两条最容易做到的先坚持一周。
+          按你各维度的实际得分挑选：得分偏高的维度给具体做法，得分不高的维度以维持为主。
+          挑一两条最容易做到的先坚持一周就好。
         </p>
         <ul className="advice">
           {advice.map((item, i) => (
@@ -244,13 +279,14 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
             </li>
           ))}
         </ul>
+        <p className="advice-note">{ADVICE_NOTE}</p>
       </section>
 
       {/* ---------- 分享 ---------- */}
       <section className="section section--tight">
         <h2 className="section__title section__title--left">分享你的脑腐段位</h2>
         <div className="share-actions">
-          <button type="button" className="btn btn--primary" onClick={handleCopy}>
+          <button type="button" className="btn btn--primary" onClick={handleCopy} ref={copyButtonRef}>
             {copied ? '✅ 已复制' : '📋 复制结果摘要'}
           </button>
           <button
@@ -261,7 +297,7 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
           >
             {generating ? '⏳ 生成中…' : '🖼️ 保存分享图'}
           </button>
-          <button type="button" className="btn btn--secondary" onClick={handleShareLink}>
+          <button type="button" className="btn btn--secondary" onClick={handleShareLink} ref={shareButtonRef}>
             🔗 一键分享
           </button>
         </div>
@@ -281,6 +317,9 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
           <button type="button" className="btn btn--ghost" onClick={onHome}>
             返回首页
           </button>
+          <button type="button" className="btn btn--secondary" onClick={onOpenCodex}>
+            查看人物图鉴
+          </button>
           <button type="button" className="btn btn--primary" onClick={onRetest}>
             重新测试
           </button>
@@ -297,6 +336,16 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
 
       {modalOpen && imageUrl && (
         <ShareModal imageUrl={imageUrl} onClose={() => setModalOpen(false)} />
+      )}
+
+      {manualCopy && (
+        <CopyFallbackModal
+          title={manualCopy.title}
+          hint={manualCopy.hint}
+          text={buildSummary(result)}
+          onClose={() => setManualCopy(null)}
+          returnFocusTo={manualCopyTriggerRef.current}
+        />
       )}
     </div>
   )

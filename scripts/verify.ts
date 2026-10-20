@@ -5,11 +5,33 @@
  */
 import { QUESTIONS as QUESTION_BANK, LEGACY_QUESTION_IDS, TOTAL_QUESTIONS } from '../src/data/questions'
 import { DIMENSIONS } from '../src/data/dimensions'
-import { TIERS, TOTAL_MAX, TOTAL_MIN } from '../src/data/tiers'
-import { calculateResult, getAnsweredCount, isComplete, restoreResult, type AnswerMap } from '../src/utils/scoring'
+import { TIERS, TOTAL_MAX, TOTAL_MIN, getTier } from '../src/data/tiers'
+import {
+  adviceBandOf,
+  buildAdvice,
+  calculateResult,
+  getAnsweredCount,
+  isComplete,
+  restoreResult,
+  type AnswerMap,
+  type DimensionScore,
+  type TestResult,
+} from '../src/utils/scoring'
 import { createSession, isValidQuestionSet, migrateLegacyAnswers, parseSession } from '../src/utils/session'
-import { loadSession, saveSession } from '../src/utils/storage'
-import { ADVICE } from '../src/data/advice'
+import { loadCodexReturn, loadSession, loadStage, saveCodexReturn, saveSession, saveStage } from '../src/utils/storage'
+import {
+  ADVICE,
+  ADVICE_BAND_ACTION_MIN,
+  ADVICE_BAND_GENTLE_MIN,
+  CONSISTENCY_NOTE,
+  GENERAL_CLOSING_KEEP,
+} from '../src/data/advice'
+import {
+  FEATURED_TIER_HIGH,
+  FEATURED_TIER_LOW,
+  FEATURED_TIER_MID,
+  type Tier,
+} from '../src/data/tiers'
 import { existsSync, readFileSync } from 'node:fs'
 
 const QUESTIONS = LEGACY_QUESTION_IDS.map(id => QUESTION_BANK.find(q => q.id === id)!)
@@ -273,7 +295,7 @@ check('旧结果按真实分数安全恢复',restoreResult(randomResult),randomR
 check('伪造总分不能恢复',restoreResult({...randomResult,total:99}),null)
 check('损坏的维度不能恢复',restoreResult({...randomResult,dimensions:[null]}),null)
 check('段位配置损坏时从真实分数重建',restoreResult({...randomResult,tier:{name:'错误的段位'}})?.tier,randomResult.tier)
-check('五维同分时建议覆盖五个维度', DIMENSIONS.every(d => tieAll.advice.includes(ADVICE[d.key][0])),true)
+check('全12分结果给出建议', tieAll.advice.length >= 3, true)
 
 // ---------------------------------------------------------------- 存储异常
 section('【11】存储禁用与损坏')
@@ -287,6 +309,13 @@ Object.defineProperty(globalThis,'window',{configurable:true,value:{
 }})
 check('正常保存轮次成功',saveSession(progress),true)
 check('正常恢复当前位置与题序',loadSession(),progress)
+saveStage('codex')
+saveCodexReturn('quiz')
+check('刷新后可恢复人物图鉴',loadStage(),'codex')
+check('图鉴记住来自答题页',loadCodexReturn(),'quiz')
+check('打开图鉴不会改写答题进度',loadSession(),progress)
+mockData['brainrot.codex-return.v1']='invalid'
+check('损坏的图鉴返回位置安全回首页',loadCodexReturn(),'home')
 mockData['brainrot.session.v2']='{'
 check('损坏JSON安全回到入口',loadSession(),null)
 delete mockData['brainrot.session.v2']
@@ -309,6 +338,174 @@ check('20分到60分的八档画像按顺序匹配',TIERS.map(t => t.portrait),[
   'characters/pure.webp','characters/tourist.webp','characters/casual.webp','characters/marinated.webp',
   'characters/cooked.webp','characters/deepfried.webp','characters/fermented.webp','characters/ascended.webp',
 ])
+
+// ---------------------------------------------------------------- 建议分层
+section('【13】建议按维度实际得分分层')
+
+/** 直接按五维得分构造结果：走与旧结果恢复相同的重建入口 */
+function resultFromScores(scores: number[], createdAt = 1000): TestResult {
+  const dimensions: DimensionScore[] = DIMENSIONS.map((d, i) => ({
+    key: d.key, name: d.name, icon: d.icon, detail: d.detail,
+    color: d.color, color2: d.color2, score: scores[i],
+    percent: Math.round(((scores[i] - 4) / 8) * 100),
+  }))
+  const total = scores.reduce((a, b) => a + b, 0)
+  return restoreResult({ total, dimensions, createdAt })!
+}
+
+const keepPool = DIMENSIONS.flatMap(d => ADVICE[d.key].keep)
+const gentlePool = DIMENSIONS.flatMap(d => ADVICE[d.key].gentle)
+const actionPool = DIMENSIONS.flatMap(d => ADVICE[d.key].action)
+const closings = [GENERAL_CLOSING_KEEP]
+const notes = Object.values(CONSISTENCY_NOTE)
+
+check('分层边界：6分为维持层', adviceBandOf(6), 'keep')
+check('分层边界：7分为温和层', adviceBandOf(7), 'gentle')
+check('分层边界：9分为温和层', adviceBandOf(9), 'gentle')
+check('分层边界：10分为行动层', adviceBandOf(10), 'action')
+check('分层常量与文案一致', [ADVICE_BAND_GENTLE_MIN, ADVICE_BAND_ACTION_MIN], [7, 10])
+
+// 场景一：五维均为 4 分
+const all4 = resultFromScores([4, 4, 4, 4, 4])
+check('五维[4,4,4,4,4]总分为20', all4.total, 20)
+check('五维[4,4,4,4,4]段位为第1档', all4.tier.level, 1)
+check('五维[4,4,4,4,4]建议条数在3—5条', all4.advice.length >= 3 && all4.advice.length <= 5, true)
+check('五维[4,4,4,4,4]说明得分一致且没有突出方向', all4.advice[0], CONSISTENCY_NOTE.keep)
+check('五维[4,4,4,4,4]只给维持层文案', all4.advice.slice(1).every(t => keepPool.includes(t) || closings.includes(t)), true)
+check('五维[4,4,4,4,4]不出现温和层文案', all4.advice.some(t => gentlePool.includes(t)), false)
+check('五维[4,4,4,4,4]不出现行动层文案', all4.advice.some(t => actionPool.includes(t)), false)
+check(
+  '五维[4,4,4,4,4]不出现未被答案支持的断言',
+  all4.advice.some(t => /空虚|停不下来|上瘾|成瘾|失控|脑子坏/.test(t)),
+  false,
+)
+
+// 场景二：总分低但单个维度高
+const lowWithHigh = resultFromScores([4, 4, 4, 4, 12])
+check('五维[4,4,4,4,12]总分为28', lowWithHigh.total, 28)
+check('五维[4,4,4,4,12]建议条数在3—5条', lowWithHigh.advice.length >= 3 && lowWithHigh.advice.length <= 5, true)
+check(
+  '五维[4,4,4,4,12]给高分维度（赛博精神状态）的行动层建议',
+  lowWithHigh.advice.filter(t => ADVICE.cyber.action.includes(t)).length >= 2,
+  true,
+)
+check('五维[4,4,4,4,12]不给低分维度的行动层建议',
+  lowWithHigh.advice.some(t => ADVICE.shortvideo.action.includes(t) || ADVICE.slang.action.includes(t)), false)
+const lowWithMild = resultFromScores([4, 4, 4, 4, 7])
+check('总分23但单维度7分时仍给该维度建议',
+  lowWithMild.advice.some(t => ADVICE.cyber.gentle.includes(t)), true)
+
+// 场景三：中等得分
+const midScores = resultFromScores([7, 8, 9, 8, 8])
+check('五维[7,8,9,8,8]总分为40', midScores.total, 40)
+check('五维[7,8,9,8,8]建议条数在3—5条', midScores.advice.length >= 3 && midScores.advice.length <= 5, true)
+check('五维[7,8,9,8,8]使用温和层文案', midScores.advice.filter(t => gentlePool.includes(t)).length >= 2, true)
+check('五维[7,8,9,8,8]不使用行动层文案', midScores.advice.some(t => actionPool.includes(t)), false)
+
+// 场景四：全部满分
+const all12 = resultFromScores([12, 12, 12, 12, 12])
+check('五维全12总分为60', all12.total, 60)
+check('五维全12段位为第8档', all12.tier.level, 8)
+check('五维全12建议条数在3—5条', all12.advice.length >= 3 && all12.advice.length <= 5, true)
+check('五维全12说明得分一致', all12.advice[0], CONSISTENCY_NOTE.action)
+check('五维全12使用行动层文案', all12.advice.filter(t => actionPool.includes(t)).length >= 2, true)
+check('五维全12不出现维持层文案', all12.advice.some(t => keepPool.includes(t)), false)
+
+// 穷举所有五维得分组合，确认条数、去重与分层都成立
+let comboCount = 0
+let comboBad = 0
+let comboDup = 0
+for (let a = 4; a <= 12; a += 1) {
+  for (let b = 4; b <= 12; b += 1) {
+    for (let c = 4; c <= 12; c += 1) {
+      for (let d = 4; d <= 12; d += 1) {
+        for (let e = 4; e <= 12; e += 1) {
+          const dims: DimensionScore[] = DIMENSIONS.map((dim, i) => ({
+            key: dim.key, name: dim.name, icon: dim.icon, detail: dim.detail,
+            color: dim.color, color2: dim.color2, score: [a, b, c, d, e][i],
+            percent: Math.round((([a, b, c, d, e][i] - 4) / 8) * 100),
+          }))
+          const advice = buildAdvice(dims)
+          comboCount += 1
+          if (advice.length < 3 || advice.length > 5) comboBad += 1
+          if (new Set(advice).size !== advice.length) comboDup += 1
+        }
+      }
+    }
+  }
+}
+check(`穷举${comboCount}种五维组合的建议条数均在3—5条`, comboBad, 0)
+check('所有组合的建议均无重复', comboDup, 0)
+
+// 结果页、旧结果恢复、分享图共用同一套建议生成逻辑
+const restoredAdvice = restoreResult({
+  total: 40, createdAt: 1700000000000,
+  dimensions: midScores.dimensions,
+})!.advice
+check('恢复的旧结果使用同一套建议逻辑', restoredAdvice, midScores.advice)
+check('分层只影响文案，不改变总分', midScores.total, 40)
+check('分层只影响文案，不改变段位', midScores.tier, getTier(40))
+check('分层只影响文案，不改变维度得分', midScores.dimensions.map(d => d.score), [7, 8, 9, 8, 8])
+
+// ---------------------------------------------------------------- 名称与画像一致性
+section('【14】人物名称 / 画像 / 文案一致性')
+const EXPECTED_TIERS: Array<{ name: string; portrait: string; min: number; max: number }> = [
+  { name: '数字净土人', portrait: 'characters/pure.webp', min: 20, max: 24 },
+  { name: '互联网观光客', portrait: 'characters/tourist.webp', min: 25, max: 29 },
+  { name: '轻度腌制人', portrait: 'characters/casual.webp', min: 30, max: 34 },
+  { name: '中度入味体', portrait: 'characters/marinated.webp', min: 35, max: 39 },
+  { name: '充分煮熟体', portrait: 'characters/cooked.webp', min: 40, max: 44 },
+  { name: '油炸酥脆体', portrait: 'characters/deepfried.webp', min: 45, max: 49 },
+  { name: '发酵变异体', portrait: 'characters/fermented.webp', min: 50, max: 54 },
+  { name: '脑腐飞升体', portrait: 'characters/ascended.webp', min: 55, max: 60 },
+]
+check('八档名称与分数区间符合当前配置', TIERS.map(t => [t.min, t.max, t.name]),
+  EXPECTED_TIERS.map(t => [t.min, t.max, t.name]))
+check('八档名称与画像文件一一对应', TIERS.map(t => [t.name, t.portrait]),
+  EXPECTED_TIERS.map(t => [t.name, t.portrait]))
+check('每个段位的英文名非空且互不相同', new Set(TIERS.map(t => t.enName)).size, 8)
+check('每个段位的图标非空', TIERS.every(t => t.icon.length > 0), true)
+check('每个段位的评语非空', TIERS.every(t => t.tagline.length > 0), true)
+check('每个段位的介绍非空', TIERS.every(t => t.description.length > 0), true)
+check('每个段位的图标互不相同', new Set(TIERS.map(t => t.icon)).size, 8)
+
+// 旧名称不应再散落在源码、页面或文档里
+const LEGACY_NAMES = ['浅尝辄止体', '半熟冲浪手', '深度入味体', '重度发酵体', '算法共生体', '轻度腌制体']
+const SCANNED_FILES = [
+  'src/data/tiers.ts', 'src/data/advice.ts', 'src/data/dimensions.ts',
+  'src/components/Home.tsx', 'src/components/Result.tsx', 'src/components/CharacterCodex.tsx',
+  'src/components/Quiz.tsx', 'src/utils/share.ts', 'src/utils/scoring.ts', 'README.md',
+]
+const leftovers: string[] = []
+for (const file of SCANNED_FILES) {
+  if (!existsSync(file)) { leftovers.push(`${file}（文件不存在）`); continue }
+  const text = readFileSync(file, 'utf8')
+  for (const name of LEGACY_NAMES) {
+    if (text.includes(name)) leftovers.push(`${file}: ${name}`)
+  }
+}
+check('源码与文档中不再出现旧人物名称', leftovers, [])
+
+check('首页举例的低档人物取自配置', FEATURED_TIER_LOW, TIERS[0])
+check('首页举例的中档人物取自配置', FEATURED_TIER_MID, TIERS[3])
+check('首页举例的高档人物取自配置', FEATURED_TIER_HIGH, TIERS[7])
+
+// 旧结果保留真实分数与日期，只按当前配置换名称（32分落在第3档）
+const legacyDimensions: DimensionScore[] = DIMENSIONS.map((dim, i) => ({
+  key: dim.key, name: dim.name, icon: dim.icon, detail: dim.detail,
+  color: dim.color, color2: dim.color2, score: [4, 4, 4, 8, 12][i],
+  percent: Math.round((([4, 4, 4, 8, 12][i] - 4) / 8) * 100),
+}))
+const legacyNamed = restoreResult({
+  total: 32, createdAt: 1700000000000,
+  tier: { level: 3, min: 30, max: 34, name: '轻度腌制体', enName: '旧名字' } as Tier,
+  dimensions: legacyDimensions,
+})!
+check('旧结果保留原总分', legacyNamed.total, 32)
+check('旧结果保留原完成时间', legacyNamed.createdAt, 1700000000000)
+check('旧结果保留原维度分数', legacyNamed.dimensions.map(d => d.score), [4, 4, 4, 8, 12])
+check('旧结果按当前配置显示统一名称', legacyNamed.tier.name, '轻度腌制人')
+check('旧结果按当前配置显示当前图标', legacyNamed.tier.icon, TIERS[2].icon)
 
 // ---------------------------------------------------------------- 汇总
 console.log(`\n${'='.repeat(46)}`)

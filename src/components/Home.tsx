@@ -1,12 +1,20 @@
 import { useState } from 'react'
 import { DIMENSIONS, QUESTIONS_PER_DIMENSION } from '../data/dimensions'
 import { QUESTION_BANK_SIZE, TOTAL_QUESTIONS } from '../data/questions'
-import { TIERS, TOTAL_MAX, TOTAL_MIN } from '../data/tiers'
+import {
+  FEATURED_TIER_HIGH,
+  FEATURED_TIER_LOW,
+  FEATURED_TIER_MID,
+  TIERS,
+  TOTAL_MAX,
+  TOTAL_MIN,
+} from '../data/tiers'
 import { DISCLAIMER_LONG } from '../data/advice'
 import type { TestResult } from '../utils/scoring'
 
 interface HomeProps {
   onStart: () => void
+  onOpenCodex: () => void
   onContinue: () => void
   answeredCount: number
   hasPendingSession: boolean
@@ -15,7 +23,7 @@ interface HomeProps {
   onViewLastResult: () => void
 }
 
-export default function Home({ onStart, onContinue, answeredCount, hasPendingSession, lastResult, onViewLastResult }: HomeProps) {
+export default function Home({ onStart, onContinue, answeredCount, hasPendingSession, lastResult, onViewLastResult, onOpenCodex }: HomeProps) {
   const [confirmRestart, setConfirmRestart] = useState(false)
   const hasUnfinished = hasPendingSession
   return (
@@ -38,8 +46,8 @@ export default function Home({ onStart, onContinue, answeredCount, hasPendingSes
           你的大脑被互联网腌入味了吗？
           <br />
           从 {QUESTION_BANK_SIZE} 道情境题中随机抽取 {TOTAL_QUESTIONS} 题，看看你是
-          <strong> 数字净土人</strong>、<strong>轻度腌制体</strong>，
-          还是已经<strong>脑腐飞升</strong>。
+          <strong> {FEATURED_TIER_LOW.name}</strong>、<strong>{FEATURED_TIER_MID.name}</strong>，
+          还是已经进阶到<strong>{FEATURED_TIER_HIGH.name}</strong>。
         </p>
 
         {lastResult && (
@@ -57,6 +65,7 @@ export default function Home({ onStart, onContinue, answeredCount, hasPendingSes
           <span className="btn__emoji">🫠</span>
           {hasUnfinished ? answeredCount === TOTAL_QUESTIONS ? '检查答案并提交' : '继续上次测试（' + answeredCount + '/' + TOTAL_QUESTIONS + '）' : lastResult ? '重新抽题再测一次' : '随机抽题，开始测试'}
         </button>
+        <button type="button" className="hero__codex-entry" onClick={onOpenCodex}>先看 {TIERS.length} 位人物图鉴 <span aria-hidden="true">↗</span></button>
         {hasUnfinished && !confirmRestart && (
           <button type="button" className="restart-link" onClick={() => setConfirmRestart(true)}>重新抽取20题</button>
         )}
@@ -89,7 +98,7 @@ export default function Home({ onStart, onContinue, answeredCount, hasPendingSes
           </div>
         </div>
         <p className="stats__hint">
-          维度：依赖 / 黑话 / 专注 / 茧房 / 精神　·　段位：从净土到飞升　·　总分 {TOTAL_MIN}—{TOTAL_MAX}
+          维度：依赖 / 黑话 / 专注 / 茧房 / 精神　·　人物：{FEATURED_TIER_LOW.name} → {FEATURED_TIER_HIGH.name}　·　总分 {TOTAL_MIN}—{TOTAL_MAX}
         </p>
       </section>
 

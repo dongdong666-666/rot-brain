@@ -2,10 +2,11 @@ import { useCallback, useEffect, useState } from 'react'
 import Home from './components/Home'
 import Quiz from './components/Quiz'
 import Result from './components/Result'
+import CharacterCodex from './components/CharacterCodex'
 import { ToastHost, useToast } from './components/Toast'
 import { calculateResult, getAnsweredCount, isComplete, type TestResult } from './utils/scoring'
 import { createSession, isValidAnswer, type QuizSession } from './utils/session'
-import { loadResult, loadSession, loadStage, saveResult, saveSession, saveStage, type Stage } from './utils/storage'
+import { loadCodexReturn, loadResult, loadSession, loadStage, saveCodexReturn, saveResult, saveSession, saveStage, type MainStage, type Stage } from './utils/storage'
 
 function loadInitialState() {
   let session = loadSession()
@@ -19,7 +20,8 @@ function loadInitialState() {
   if (storedStage === 'quiz' && session) stage = 'quiz'
   else if (storedStage === 'result' && result) stage = 'result'
   else if (storedStage === 'result' && session) stage = 'quiz'
-  return { session, result, stage }
+  else if (storedStage === 'codex') stage = 'codex'
+  return { session, result, stage, codexReturn: loadCodexReturn() }
 }
 export default function App() {
   const { toasts, notify } = useToast()
@@ -28,10 +30,12 @@ export default function App() {
   const [session, setSession] = useState<QuizSession | null>(initial.session)
   const [result, setResult] = useState<TestResult | null>(initial.result)
   const [storageIssue, setStorageIssue] = useState(false)
+  const [codexReturn, setCodexReturn] = useState<MainStage>(initial.codexReturn)
 
   useEffect(() => { if (!saveStage(stage)) setStorageIssue(true) }, [stage])
   useEffect(() => { if (session && !saveSession(session)) setStorageIssue(true) }, [session])
   useEffect(() => { if (result && !saveResult(result)) setStorageIssue(true) }, [result])
+  useEffect(() => { if (!saveCodexReturn(codexReturn)) setStorageIssue(true) }, [codexReturn])
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'auto' }) }, [stage])
 
   const handleStart = useCallback(() => {
@@ -59,6 +63,12 @@ export default function App() {
   const handleHome = useCallback(() => setStage('home'), [])
   const handleContinue = useCallback(() => { if (session) setStage('quiz') }, [session])
   const handleViewLastResult = useCallback(() => { if (result) setStage('result') }, [result])
+  const handleOpenCodex = useCallback(() => {
+    if (stage !== 'codex') { setCodexReturn(stage); setStage('codex') }
+  }, [stage])
+  const returnStage: MainStage = codexReturn === 'quiz' && session ? 'quiz'
+    : codexReturn === 'result' && result ? 'result' : 'home'
+  const hasPendingTest = session !== null && (!session.completedAt || !isComplete(session.answers, session.questionIds))
   const answeredCount = session ? getAnsweredCount(session.answers, session.questionIds) : 0
 
   return (
@@ -71,16 +81,24 @@ export default function App() {
         <button type="button" className="topbar__brand" onClick={handleHome}>
           <span className="topbar__logo">🧠</span><span className="topbar__name">脑腐指数测试</span>
         </button>
-        <span className="topbar__tag">仅供娱乐</span>
+        <nav className="topbar__actions" aria-label="网站导航">
+          <button type="button" className="topbar__codex" onClick={handleOpenCodex}
+            aria-label="打开人物图鉴" aria-current={stage === 'codex' ? 'page' : undefined}>人物图鉴</button>
+          <span className="topbar__tag">仅供娱乐</span>
+        </nav>
       </header>
       <main className="main">
         {storageIssue && <p className="storage-warning" role="status">当前浏览器无法保存进度，本轮仍可完成；刷新或关闭页面后可能丢失。</p>}
         {stage === 'home' && <Home onStart={handleStart} onContinue={handleContinue}
-          answeredCount={answeredCount} hasPendingSession={session !== null && (!session.completedAt || !isComplete(session.answers, session.questionIds))}
-          lastResult={result} onViewLastResult={handleViewLastResult} />}
+          answeredCount={answeredCount} hasPendingSession={hasPendingTest}
+          lastResult={result} onViewLastResult={handleViewLastResult} onOpenCodex={handleOpenCodex} />}
         {stage === 'quiz' && session && <Quiz session={session} onSelect={handleSelect}
           onNavigate={handleNavigate} onFinish={handleFinish} onExit={handleHome} notify={notify} />}
-        {stage === 'result' && result && <Result result={result} onRetest={handleStart} onHome={handleHome} notify={notify} />}
+        {stage === 'result' && result && <Result result={result} onRetest={handleStart} onHome={handleHome} onOpenCodex={handleOpenCodex} notify={notify} />}
+        {stage === 'codex' && <CharacterCodex onBack={() => setStage(returnStage)}
+          backLabel={returnStage === 'quiz' ? '返回继续答题' : returnStage === 'result' ? '返回我的结果' : '返回首页'}
+          onTakeTest={hasPendingTest ? handleContinue : handleStart}
+          hasPendingTest={hasPendingTest} lastResultLevel={result?.tier.level} />}
       </main>
       <ToastHost toasts={toasts} />
     </div>

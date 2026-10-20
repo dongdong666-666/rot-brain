@@ -1,0 +1,860 @@
+﻿=== 1. 静态自检：npm run verify ===
+
+> brainrot-index-test@1.0.0 verify
+> esbuild scripts/verify.ts --bundle --platform=node --format=cjs --outfile=node_modules/.tmp/verify.cjs --log-level=error && node node_modules/.tmp/verify.cjs
+
+
+【1】题目与配置结构
+  ✅ 题目总数为 20
+  ✅ 五个维度各 4 题
+  ✅ 每题 3 个选项且分值为 1/2/3
+  ✅ 题目 id 唯一且连续
+  ✅ 段位区间连续覆盖 20—60
+
+【2】全选最低 / 全选最高
+  ✅ 全选最低分总分为 20
+  ✅ 全选最低分进度为 0%
+  ✅ 全选最低分段位为第 1 档
+  ✅ 全选最低分各维度为 4 分
+  ✅ 全选最低分各维度进度为 0%
+  ✅ 全选最高分总分为 60
+  ✅ 全选最高分进度为 100%
+  ✅ 全选最高分段位为第 8 档
+  ✅ 全选最高分各维度为 12 分
+  ✅ 全选最高分各维度进度为 100%
+
+【3】八个段位的边界判断
+  ✅ 总分 20 → 第 1 档
+  ✅ 总分 21 → 第 1 档
+  ✅ 总分 24 → 第 1 档
+  ✅ 总分 25 → 第 2 档
+  ✅ 总分 29 → 第 2 档
+  ✅ 总分 30 → 第 3 档
+  ✅ 总分 34 → 第 3 档
+  ✅ 总分 35 → 第 4 档
+  ✅ 总分 39 → 第 4 档
+  ✅ 总分 40 → 第 5 档
+  ✅ 总分 44 → 第 5 档
+  ✅ 总分 45 → 第 6 档
+  ✅ 总分 49 → 第 6 档
+  ✅ 总分 50 → 第 7 档
+  ✅ 总分 54 → 第 7 档
+  ✅ 总分 55 → 第 8 档
+  ✅ 总分 60 → 第 8 档
+
+【4】构造答案的总分校验
+  ✅ 构造答案实际总分为 20
+  ✅ 构造答案实际总分为 21
+  ✅ 构造答案实际总分为 24
+  ✅ 构造答案实际总分为 25
+  ✅ 构造答案实际总分为 29
+  ✅ 构造答案实际总分为 30
+  ✅ 构造答案实际总分为 34
+  ✅ 构造答案实际总分为 35
+  ✅ 构造答案实际总分为 39
+  ✅ 构造答案实际总分为 40
+  ✅ 构造答案实际总分为 44
+  ✅ 构造答案实际总分为 45
+  ✅ 构造答案实际总分为 49
+  ✅ 构造答案实际总分为 50
+  ✅ 构造答案实际总分为 54
+  ✅ 构造答案实际总分为 55
+  ✅ 构造答案实际总分为 60
+
+【5】未完成全部题目时不生成结果
+  ✅ 少答 1 题时返回 null
+  ✅ isComplete 判定为 false
+  ✅ 已答题数为 19
+  ✅ 全部未答时返回 null
+  ✅ 全部未答时已答题数为 0
+
+【6】返回修改答案后计分正确
+  ✅ 改 2 题后总分为 57
+  ✅ 第 1 题所属维度为 10 分
+  ✅ 第 7 题所属维度为 11 分
+  ✅ 未修改维度仍为 12 分
+  ✅ 改后段位仍为第 8 档
+  ✅ 同一题反复修改后取最后一次
+
+【7】突出维度与并列判定
+  ✅ 全 12 分时五个维度并列
+  ✅ 全 12 分时标记为并列
+  ✅ 全 4 分时五个维度并列
+  ✅ 全 4 分时标记为并列
+  ✅ 名次无并列时取 2 个
+  ✅ 第 1 名为短视频依赖
+  ✅ 第 2 名为黑话浓度
+  ✅ 名次无并列时不标记并列
+  ✅ 维度分数为 12 / 11 / 8 / 8 / 8
+  ✅ 第 2 名并列时包含全部同分维度
+  ✅ 第 2 名并列时标记并列
+  ✅ 第 1 名仍排在首位
+  ✅ 两个维度同为最高时取 2 个
+  ✅ 两个维度同为最高时标记并列
+
+【8】建议与文案
+  ✅ 结果建议不少于 3 条
+  ✅ 结果包含时间戳
+  ✅ 每个段位都有名称/评语/描述/图标
+
+【9】60题库与均衡随机抽取
+  ✅ 题库总量为60题
+  ✅ 题库每维度12题
+  ✅ 题库ID唯一
+  ✅ 题干没有重复
+  ✅ 题库每题3个有效分值
+  ✅ 200轮均为20题且每维度4题
+  ✅ 200轮覆盖全部60道题
+  ✅ 每轮选项顺序都是完整排列
+  ✅ 题序不是固定一套
+  ✅ 选项不是全部固定为低中高
+  ✅ 200轮最低分均为20
+  ✅ 200轮最高分均为60
+  ✅ 连续重抽不重复上一轮题目
+  ✅ 相同题组答案重复计分一致
+  ✅ 题序反转不改变计分
+  ✅ 本轮以外的答案不影响得分
+  ✅ 重复题组不允许生成结果
+  ✅ 不完整题组不允许生成结果
+  ✅ 非法答案不能计为已答完
+
+【10】题组、选项与当前位置恢复
+  ✅ JSON往返保留整轮题目、选项、答案和位置
+  ✅ 正式提交时间可以持久恢复
+  ✅ 非法提交时间不复用
+  ✅ 题库版本错误不复用
+  ✅ 越界位置拒绝恢复
+  ✅ 重复选项排列拒绝恢复
+  ✅ 损坏答案被过滤，其他答案继续保留
+  ✅ 旧进度保持原20题
+  ✅ 旧进度保留有效答案
+  ✅ 旧进度保持原选项顺序
+  ✅ 旧进度跳到首个未答题
+  ✅ 旧结果按真实分数安全恢复
+  ✅ 伪造总分不能恢复
+  ✅ 损坏的维度不能恢复
+  ✅ 段位配置损坏时从真实分数重建
+  ✅ 全12分结果给出建议
+
+【11】存储禁用与损坏
+  ✅ 正常保存轮次成功
+  ✅ 正常恢复当前位置与题序
+  ✅ 刷新后可恢复人物图鉴
+  ✅ 图鉴记住来自答题页
+  ✅ 打开图鉴不会改写答题进度
+  ✅ 损坏的图鉴返回位置安全回首页
+  ✅ 损坏JSON安全回到入口
+  ✅ 旧存储记录可迁移
+  ✅ 存储不可用返回失败而非假成功
+  ✅ 存储不可用读取不崩溃
+  ✅ 内存答案仍可生成正式结果
+
+【12】结果人物画像
+  ✅ 八个段位均配置本地画像
+  ✅ 八个段位画像互不重复
+  ✅ 八张画像文件存在
+  ✅ 八张画像均为有效WebP容器
+  ✅ 20分到60分的八档画像按顺序匹配
+
+【13】建议按维度实际得分分层
+  ✅ 分层边界：6分为维持层
+  ✅ 分层边界：7分为温和层
+  ✅ 分层边界：9分为温和层
+  ✅ 分层边界：10分为行动层
+  ✅ 分层常量与文案一致
+  ✅ 五维[4,4,4,4,4]总分为20
+  ✅ 五维[4,4,4,4,4]段位为第1档
+  ✅ 五维[4,4,4,4,4]建议条数在3—5条
+  ✅ 五维[4,4,4,4,4]说明得分一致且没有突出方向
+  ✅ 五维[4,4,4,4,4]只给维持层文案
+  ✅ 五维[4,4,4,4,4]不出现温和层文案
+  ✅ 五维[4,4,4,4,4]不出现行动层文案
+  ✅ 五维[4,4,4,4,4]不出现未被答案支持的断言
+  ✅ 五维[4,4,4,4,12]总分为28
+  ✅ 五维[4,4,4,4,12]建议条数在3—5条
+  ✅ 五维[4,4,4,4,12]给高分维度（赛博精神状态）的行动层建议
+  ✅ 五维[4,4,4,4,12]不给低分维度的行动层建议
+  ✅ 总分23但单维度7分时仍给该维度建议
+  ✅ 五维[7,8,9,8,8]总分为40
+  ✅ 五维[7,8,9,8,8]建议条数在3—5条
+  ✅ 五维[7,8,9,8,8]使用温和层文案
+  ✅ 五维[7,8,9,8,8]不使用行动层文案
+  ✅ 五维全12总分为60
+  ✅ 五维全12段位为第8档
+  ✅ 五维全12建议条数在3—5条
+  ✅ 五维全12说明得分一致
+  ✅ 五维全12使用行动层文案
+  ✅ 五维全12不出现维持层文案
+  ✅ 穷举59049种五维组合的建议条数均在3—5条
+  ✅ 所有组合的建议均无重复
+  ✅ 恢复的旧结果使用同一套建议逻辑
+  ✅ 分层只影响文案，不改变总分
+  ✅ 分层只影响文案，不改变段位
+  ✅ 分层只影响文案，不改变维度得分
+
+【14】人物名称 / 画像 / 文案一致性
+  ✅ 八档名称与分数区间符合当前配置
+  ✅ 八档名称与画像文件一一对应
+  ✅ 每个段位的英文名非空且互不相同
+  ✅ 每个段位的图标非空
+  ✅ 每个段位的评语非空
+  ✅ 每个段位的介绍非空
+  ✅ 每个段位的图标互不相同
+  ✅ 源码与文档中不再出现旧人物名称
+  ✅ 首页举例的低档人物取自配置
+  ✅ 首页举例的中档人物取自配置
+  ✅ 首页举例的高档人物取自配置
+  ✅ 旧结果保留原总分
+  ✅ 旧结果保留原完成时间
+  ✅ 旧结果保留原维度分数
+  ✅ 旧结果按当前配置显示统一名称
+  ✅ 旧结果按当前配置显示当前图标
+
+==============================================
+  通过 178 项，失败 0 项
+==============================================
+
+=== 2. 类型检查：npm run typecheck ===
+
+> brainrot-index-test@1.0.0 typecheck
+> tsc -b --noEmit
+
+
+=== 3. 生产构建：npm run build ===
+
+> brainrot-index-test@1.0.0 build
+> tsc -b && vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 47 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                 [39m[1m[2m  0.83 kB[22m[1m[22m[2m │ gzip:  0.67 kB[22m
+[2mdist/[22m[35massets/index-DLmv28un.css  [39m[1m[2m 32.06 kB[22m[1m[22m[2m │ gzip:  7.45 kB[22m
+[2mdist/[22m[36massets/index-DwdDRNiH.js   [39m[1m[2m196.17 kB[22m[1m[22m[2m │ gzip: 72.19 kB[22m
+[32m✓ built in 1.38s[39m
+
+=== 4. 浏览器：八档一致性 / 建议场景 / 视口 ===
+### Result
+"===== 【1】八档名称、画像与分数边界 =====\n✅ 20分 → 数字净土人 | 第 1 / 8 段位 · Digital Pure Land | pure.webp | 建议5条\n✅ 25分 → 互联网观光客 | 第 2 / 8 段位 · Internet Tourist | tourist.webp | 建议5条\n✅ 30分 → 轻度腌制人 | 第 3 / 8 段位 · Lightly Pickled | casual.webp | 建议5条\n✅ 35分 → 中度入味体 | 第 4 / 8 段位 · Half Marinated | marinated.webp | 建议5条\n✅ 40分 → 充分煮熟体 | 第 5 / 8 段位 · Well Cooked | cooked.webp | 建议5条\n✅ 45分 → 油炸酥脆体 | 第 6 / 8 段位 · Deep Fried | deepfried.webp | 建议5条\n✅ 50分 → 发酵变异体 | 第 7 / 8 段位 · Fermented Mutant | fermented.webp | 建议5条\n✅ 55分 → 脑腐飞升体 | 第 8 / 8 段位 · Ascended Brain Rot | ascended.webp | 建议5条\n八档名称与画像全部一致 = true\n\n===== 【2】建议按维度得分分层 =====\n\n--- 五维[4,4,4,4,4] 总分20（实测总分 20/60）· 段位 数字净土人 · 5 条建议\n    1. 五个维度得分一致，目前没有明显偏高的方向，保持现在的节奏就好。\n    2. 你本来就不太会被自动播放牵着走，这种节奏挺好，不用特意改。\n    3. 想刷的时候就刷，刷完能放下，说明边界还在你手里。\n    4. 你的表达还挺「人话」，梗只是调味料，不是主菜。\n    5. 现在这个状态挺舒服的，保持住就好，不用刻意「戒断」。\n    条数在3—5之间 = true\n\n--- 五维[4,4,4,4,12] 总分28（实测总分 28/60）· 段位 互联网观光客 · 3 条建议\n    1. 连续刷到两条让你难受的内容就强制退出，去喝杯水再决定要不要回来。\n    2. 把最容易上头的那个话题设为「不感兴趣」，给算法一个明确信号。\n    3. 先挑一条最容易做到的试试，不用一次全改。\n    条数在3—5之间 = true\n\n--- 五维[7,8,9,8,8] 总分40（实测总分 40/60）· 段位 充分煮熟体 · 4 条建议\n    1. 试试 25 分钟只做一件事，手机倒扣、通知关掉。\n    2. 开始工作前先写一句「这一轮只做这个」，做完再允许自己切走。\n    3. 每天挑一句话，用不带梗的完整句子重新说一遍。\n    4. 挑一两条最容易做到的先坚持一周，剩下的慢慢来。\n    条数在3—5之间 = true\n\n--- 五维[12,12,12,12,12] 总分60（实测总分 60/60）· 段位 脑腐飞升体 · 5 条建议\n    1. 五个维度得分一致，说明这些习惯比较均匀地分布在你的日常里。\n    2. 给短视频 App 设一个每日提醒限额，到点后先把手机倒扣再决定要不要继续。\n    3. 把最容易停不下来的那个入口从主屏移走，只保留网页或小号入口。\n    4. 试着用三句话向没上网的朋友解释一个梗，卡壳的地方就是可以补回来的表达。\n    5. 挑一两条最容易做到的先坚持一周，剩下的慢慢来。\n    条数在3—5之间 = true\n\n===== 【3】人物图鉴名称一致性 =====\n1. 数字净土人  [NO.01 20—24分]\n2. 互联网观光客  [NO.02 25—29分]\n3. 轻度腌制人  [NO.03 30—34分]\n4. 中度入味体  [NO.04 35—39分]\n5. 充分煮熟体  [NO.05 40—44分]\n6. 油炸酥脆体  [NO.06 45—49分]\n7. 发酵变异体  [NO.07 50—54分]\n8. 脑腐飞升体  [NO.08 55—60分]\n图鉴名称与配置一致 = true\n上次测得标记数（应为1，因为当前60分） = 1\n  档案1: 数字净土人 | 对应测试总分 20—24 分 · 第 1 / 8 档 | pure.webp\n  档案2: 互联网观光客 | 对应测试总分 25—29 分 · 第 2 / 8 档 | tourist.webp\n  档案3: 轻度腌制人 | 对应测试总分 30—34 分 · 第 3 / 8 档 | casual.webp\n  档案4: 中度入味体 | 对应测试总分 35—39 分 · 第 4 / 8 档 | marinated.webp\n  档案5: 充分煮熟体 | 对应测试总分 40—44 分 · 第 5 / 8 档 | cooked.webp\n  档案6: 油炸酥脆体 | 对应测试总分 45—49 分 · 第 6 / 8 档 | deepfried.webp\n  档案7: 发酵变异体 | 对应测试总分 50—54 分 · 第 7 / 8 档 | fermented.webp\n  档案8: 脑腐飞升体 | 对应测试总分 55—60 分 · 第 8 / 8 档 | ascended.webp\n图鉴返回后仍在结果页 = true，段位 = 脑腐飞升体\n\n===== 【4】首页文案（取自人物配置） =====\n首页举例：你的大脑被互联网腌入味了吗？ 从 60 道情境题中随机抽取 20 题，看看你是 数字净土人、中度入味体， 还是已经进阶到脑腐飞升体。\n统计提示：维度：依赖 / 黑话 / 专注 / 茧房 / 精神 · 人物：数字净土人 → 脑腐飞升体 · 总分 20—60\n最近结果：上次测得「脑腐飞升体」 · 60 / 60\n首页不含旧名称 = true\n\n===== 【5】四档视口 =====\n320px → 首页 320/320 结果页 320/320 图鉴 320/320 | 段位名未截断=true 图鉴名未截断=true\n390px → 首页 390/390 结果页 390/390 图鉴 390/390 | 段位名未截断=true 图鉴名未截断=true\n768px → 首页 768/768 结果页 768/768 图鉴 768/768 | 段位名未截断=true 图鉴名未截断=true\n1440px → 首页 1440/1440 结果页 1440/1440 图鉴 1440/1440 | 段位名未截断=true 图鉴名未截断=true\n\n[控制台] 错误数 = 0"
+### Ran Playwright code
+```js
+await (/**
+ * 本轮改动的浏览器验证（开发用，不参与打包）。
+ * 执行：playwright-cli run-code --filename=scripts/browser-check.cjs
+ */
+async (page) => {
+  const out = []
+  const log = (m) => out.push(m)
+  const errors = []
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
+  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`))
+
+  const BASE = 'http://localhost:5173/rot-brain/'
+  const DIM_KEYS = ['shortvideo', 'slang', 'attention', 'cocoon', 'cyber']
+
+  try {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await page.goto(BASE, { waitUntil: 'networkidle' })
+
+    /** 注入指定五维得分的结果，走与旧结果恢复相同的入口 */
+    const showResult = async (scores) => {
+      const dimensions = DIM_KEYS.map((key, i) => ({ key, score: scores[i] }))
+      const total = scores.reduce((a, b) => a + b, 0)
+      await page.evaluate(([dims, t]) => {
+        localStorage.setItem('brainrot.result.v1', JSON.stringify({ total: t, dimensions: dims, createdAt: 1700000000000 }))
+        localStorage.setItem('brainrot.stage.v1', 'result')
+        localStorage.removeItem('brainrot.session.v2')
+        localStorage.removeItem('brainrot.answers.v1')
+      }, [dimensions, total])
+      await page.reload({ waitUntil: 'networkidle' })
+      await page.waitForSelector('.page--result', { timeout: 15000 })
+      await page.waitForTimeout(700)
+      return total
+    }
+
+    const readResult = async () => ({
+      name: await page.locator('.tier-card__name').innerText(),
+      level: (await page.locator('.tier-card__level').innerText()).replace(/\s+/g, ' '),
+      portrait: await page.locator('.tier-card__portrait img').getAttribute('src').catch(() => '(回退图标)'),
+      total: (await page.locator('.score-card__value').innerText()).replace(/\s+/g, ''),
+      range: (await page.locator('.score-card__range').innerText()).replace(/\s+/g, ' '),
+      advice: (await page.locator('.advice__item .advice__text').allInnerTexts()).map(t => t.trim()),
+    })
+
+    // ================= 1. 八档名称 / 画像 / 分数边界 =================
+    log('===== 【1】八档名称、画像与分数边界 =====')
+    const EXPECTED = [
+      ['数字净土人', 'pure.webp', 20], ['互联网观光客', 'tourist.webp', 25],
+      ['轻度腌制人', 'casual.webp', 30], ['中度入味体', 'marinated.webp', 35],
+      ['充分煮熟体', 'cooked.webp', 40], ['油炸酥脆体', 'deepfried.webp', 45],
+      ['发酵变异体', 'fermented.webp', 50], ['脑腐飞升体', 'ascended.webp', 55],
+    ]
+    let nameOk = true
+    for (let i = 0; i < 8; i += 1) {
+      const v = 4 + i
+      const total = await showResult([v, v, v, v, v])
+      const r = await readResult()
+      const [expName, expFile, expTotal] = EXPECTED[i]
+      const ok = r.name === expName && r.portrait.endsWith(expFile) && total === expTotal
+      if (!ok) nameOk = false
+      log(`${ok ? '✅' : '❌'} ${total}分 → ${r.name} | ${r.level} | ${r.portrait.split('/').pop()} | 建议${r.advice.length}条`)
+    }
+    log(`八档名称与画像全部一致 = ${nameOk}`)
+
+    // ================= 2. 建议场景 =================
+    log('\n===== 【2】建议按维度得分分层 =====')
+    const scenarios = [
+      { label: '五维[4,4,4,4,4] 总分20', scores: [4, 4, 4, 4, 4] },
+      { label: '五维[4,4,4,4,12] 总分28', scores: [4, 4, 4, 4, 12] },
+      { label: '五维[7,8,9,8,8] 总分40', scores: [7, 8, 9, 8, 8] },
+      { label: '五维[12,12,12,12,12] 总分60', scores: [12, 12, 12, 12, 12] },
+    ]
+    for (const s of scenarios) {
+      const total = await showResult(s.scores)
+      const r = await readResult()
+      log(`\n--- ${s.label}（实测总分 ${r.total}）· 段位 ${r.name} · ${r.advice.length} 条建议`)
+      r.advice.forEach((t, i) => log(`    ${i + 1}. ${t}`))
+      log(`    条数在3—5之间 = ${r.advice.length >= 3 && r.advice.length <= 5}`)
+    }
+
+    // ================= 3. 图鉴名称一致性 =================
+    log('\n===== 【3】人物图鉴名称一致性 =====')
+    await showResult([12, 12, 12, 12, 12])
+    await page.locator('.topbar__codex').click()
+    await page.waitForSelector('.page--codex')
+    await page.waitForTimeout(600)
+    const codexNames = await page.locator('.codex-card__name').allInnerTexts()
+    const codexMeta = await page.locator('.codex-card__meta').allInnerTexts()
+    codexNames.forEach((n, i) => log(`${i + 1}. ${n}  [${codexMeta[i].replace(/\s+/g, ' ')}]`))
+    log(`图鉴名称与配置一致 = ${JSON.stringify(codexNames) === JSON.stringify(EXPECTED.map(e => e[0]))}`)
+    const marked = await page.locator('.codex-card__mine').count()
+    log(`上次测得标记数（应为1，因为当前60分） = ${marked}`)
+
+    // 逐个打开八份档案
+    for (let i = 0; i < 8; i += 1) {
+      await page.locator('.codex-card__open').nth(i).click()
+      await page.waitForTimeout(350)
+      const title = await page.locator('#codex-dialog-title').innerText()
+      const range = (await page.locator('.codex-dialog__range').innerText()).replace(/\s+/g, ' ')
+      const art = await page.locator('.codex-dialog__art img').getAttribute('src').catch(() => '(回退)')
+      log(`  档案${i + 1}: ${title} | ${range} | ${art.split('/').pop()}`)
+      await page.locator('.codex-dialog__close').click()
+      await page.waitForTimeout(250)
+    }
+
+    // 图鉴返回原结果
+    await page.locator('.codex-back').click()
+    await page.waitForSelector('.page--result')
+    await page.waitForTimeout(500)
+    log(`图鉴返回后仍在结果页 = ${(await page.locator('.page--result').count()) > 0}，段位 = ${await page.locator('.tier-card__name').innerText()}`)
+
+    // ================= 4. 首页举例与统计文案 =================
+    log('\n===== 【4】首页文案（取自人物配置） =====')
+    await page.evaluate(() => { localStorage.setItem('brainrot.stage.v1', 'home') })
+    await page.reload({ waitUntil: 'networkidle' })
+    await page.waitForTimeout(600)
+    log(`首页举例：${(await page.locator('.hero__desc').innerText()).replace(/\s+/g, ' ')}`)
+    log(`统计提示：${(await page.locator('.stats__hint').innerText()).replace(/\s+/g, ' ')}`)
+    log(`最近结果：${(await page.locator('.last-result__text').innerText()).replace(/\s+/g, ' ')}`)
+    const heroText = await page.locator('.hero__desc').innerText()
+    log(`首页不含旧名称 = ${!['浅尝辄止体', '半熟冲浪手', '深度入味体', '重度发酵体', '算法共生体', '轻度腌制体'].some(n => heroText.includes(n))}`)
+
+    // ================= 5. 四档视口无横向溢出 =================
+    log('\n===== 【5】四档视口 =====')
+    for (const w of [320, 390, 768, 1440]) {
+      await page.setViewportSize({ width: w, height: 860 })
+      await page.waitForTimeout(450)
+      const home = await page.evaluate(() => ({ s: document.documentElement.scrollWidth, i: window.innerWidth }))
+      await showResult([12, 12, 12, 12, 12])
+      const result = await page.evaluate(() => ({ s: document.documentElement.scrollWidth, i: window.innerWidth }))
+      const nameBox = await page.locator('.tier-card__name').evaluate(el => ({ sw: el.scrollWidth, cw: el.clientWidth }))
+      await page.locator('.topbar__codex').click()
+      await page.waitForSelector('.page--codex')
+      await page.waitForTimeout(400)
+      const codex = await page.evaluate(() => ({ s: document.documentElement.scrollWidth, i: window.innerWidth }))
+      const cardClip = await page.locator('.codex-card__name').first().evaluate(el => ({ sw: el.scrollWidth, cw: el.clientWidth }))
+      await page.evaluate(() => { localStorage.setItem('brainrot.stage.v1', 'home') })
+      log(`${w}px → 首页 ${home.s}/${home.i} 结果页 ${result.s}/${result.i} 图鉴 ${codex.s}/${codex.i} | 段位名未截断=${nameBox.sw <= nameBox.cw + 1} 图鉴名未截断=${cardClip.sw <= cardClip.cw + 1}`)
+    }
+
+    log(`\n[控制台] 错误数 = ${errors.length}`)
+    errors.slice(0, 6).forEach(e => log(`   · ${e}`))
+  } catch (e) {
+    log(`\n[中断] ${e.message.split('\n')[0]}`)
+    log(`[控制台] 错误数 = ${errors.length}`)
+    errors.slice(0, 6).forEach(x => log(`   · ${x}`))
+  }
+
+  return out.join('\n')
+}
+)(page);
+```
+### Events
+- New console entries: .playwright-cli\console-2026-10-20T15-23-44-803Z.log#L62-L80
+
+=== 5. 浏览器：复制 / 手动复制 / 下载反馈 ===
+### Result
+"===== 【1】自动复制成功 =====\nToast = 结果摘要已复制到剪贴板\n按钮文案 = ✅ 已复制\n剪贴板含段位 = true；前30字 = 🧠 我的脑腐指数测试结果\r⏎\r⏎段位：🍲 充分煮熟体（第\n未弹出手动复制窗口 = true\n\n===== 【2】自动复制失败 → 手动复制弹窗 =====\nToast = 自动复制失败，已打开手动复制窗口\n弹出手动复制窗口 = true\n文本框内容长度 = 303\n文本框为只读 = true\n文本框含总分40 = true\n文本框含段位 = true\n文本框含免责声明 = true\n提示文案 = 自动复制没有成功。下面是本次完整的结果摘要，可以全选或长按后复制。\n操作提示 = 电脑端可按 Ctrl / ⌘ + C；手机上长按文本框即可选择复制。\n点「全选文本」后选中字符数 = 303（应等于 303）\nEscape 关闭弹窗 = true\n关闭后焦点元素 = 📋 复制结果摘要\n再次弹出 = true\n关闭按钮生效 = true\n\n===== 【3】重新测试后不残留旧摘要 =====\n重新测试后进入答题页 = true\n重新测试后手动复制窗口已关闭 = true\n新结果总分 = 40/60\n新窗口摘要含新总分 = true\n新摘要与旧摘要不同 = true\n\n===== 【4】下载反馈（桌面） =====\nToast = 已发起图片下载，请查看浏览器下载列表。\n提示改为「已发起下载」= true\n未声称保存成功 = true\n保留「查看已生成的分享图」入口 = true\n预览图可用 = true（750×2076）\n\n===== 【5】移动端预览 =====\nToast = 已生成分享图，长按图片即可保存\n弹出预览 = true\n提示 = 长按图片保存，分享到任意平台\n弹窗位置 y=87 高=669 视口=844 → 可见 = true\n\n===== 【6】图片生成失败反馈 =====\nToast = 生成分享图失败，请稍后重试\n显示失败而非成功 = true\n失败时不弹预览 = true\n\n[控制台] 错误数 = 1\n   · 生成分享图失败： Error: 模拟导出失败\n    at HTMLCanvasElement.toDataURL (eval at evaluate (:368:30), <anonymous>:7:67)\n    at renderResultImage (http://localhost:5173/rot-brain/src/utils/share.ts:286:17)\n    at async http://localhost:5173/rot-brain/src/components/Result.tsx:82:19\n    at async http://localhost:5173/rot-brain/src/components/Result.tsx:94:17"
+### Ran Playwright code
+```js
+await (/**
+ * 复制 / 下载反馈专项验证（开发用，不参与打包）。
+ * 执行：playwright-cli run-code --filename=scripts/share-copy-check.cjs
+ */
+async (page) => {
+  const out = []
+  const log = (m) => out.push(m)
+  const errors = []
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
+  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`))
+
+  const BASE = 'http://localhost:5173/rot-brain/'
+  const DIM_KEYS = ['shortvideo', 'slang', 'attention', 'cocoon', 'cyber']
+
+  try {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await page.goto(BASE, { waitUntil: 'networkidle' })
+
+    const showResult = async (scores) => {
+      const dimensions = DIM_KEYS.map((key, i) => ({ key, score: scores[i] }))
+      const total = scores.reduce((a, b) => a + b, 0)
+      await page.evaluate(([dims, t]) => {
+        localStorage.setItem('brainrot.result.v1', JSON.stringify({ total: t, dimensions: dims, createdAt: 1700000000000 }))
+        localStorage.setItem('brainrot.stage.v1', 'result')
+        localStorage.removeItem('brainrot.session.v2')
+        localStorage.removeItem('brainrot.answers.v1')
+      }, [dimensions, total])
+      await page.reload({ waitUntil: 'networkidle' })
+      await page.waitForSelector('.page--result', { timeout: 15000 })
+      await page.waitForTimeout(700)
+      return total
+    }
+
+    // ================= 1. 自动复制成功 =================
+    log('===== 【1】自动复制成功 =====')
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => {})
+    await showResult([8, 8, 8, 8, 8])
+    await page.getByRole('button', { name: /复制结果摘要/ }).click()
+    await page.waitForTimeout(700)
+    const okToast = await page.locator('.toast__text').first().innerText().catch(() => '无')
+    const clip = await page.evaluate(() => navigator.clipboard.readText().catch(() => '(读取受限)'))
+    log(`Toast = ${okToast}`)
+    log(`按钮文案 = ${await page.getByRole('button', { name: /复制|已复制/ }).first().innerText()}`)
+    log(`剪贴板含段位 = ${clip.includes('充分煮熟体')}；前30字 = ${clip.slice(0, 30).replace(/\n/g, '⏎')}`)
+    log(`未弹出手动复制窗口 = ${(await page.locator('.modal--copy').count()) === 0}`)
+
+    // ================= 2. 自动复制失败 → 手动复制弹窗 =================
+    log('\n===== 【2】自动复制失败 → 手动复制弹窗 =====')
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: { writeText: () => Promise.reject(new Error('模拟失败')) },
+      })
+      document.execCommand = () => false
+    })
+    // 等上一条成功提示消失，避免读到旧 Toast
+    await page.waitForTimeout(3000)
+    await page.getByRole('button', { name: /复制结果摘要|已复制/ }).first().click()
+    await page.waitForTimeout(800)
+    const failToast = await page.locator('.toast__text').last().innerText().catch(() => '无')
+    const modalShown = (await page.locator('.modal--copy').count()) > 0
+    log(`Toast = ${failToast}`)
+    log(`弹出手动复制窗口 = ${modalShown}`)
+    if (modalShown) {
+      const ta = page.locator('.modal__textarea')
+      const value = await ta.inputValue()
+      log(`文本框内容长度 = ${value.length}`)
+      log(`文本框为只读 = ${await ta.getAttribute('readonly') !== null}`)
+      log(`文本框含总分40 = ${value.includes('40 / 60')}`)
+      log(`文本框含段位 = ${value.includes('充分煮熟体')}`)
+      log(`文本框含免责声明 = ${value.includes('不是医学诊断')}`)
+      log(`提示文案 = ${(await page.locator('.modal__hint').first().innerText()).replace(/\s+/g, ' ')}`)
+      log(`操作提示 = ${(await page.locator('.modal__hint--soft').innerText()).replace(/\s+/g, ' ')}`)
+
+      // 全选按钮
+      await page.getByRole('button', { name: '全选文本' }).click()
+      await page.waitForTimeout(300)
+      const selected = await page.locator('.modal__textarea').evaluate(el => el.selectionEnd - el.selectionStart)
+      log(`点「全选文本」后选中字符数 = ${selected}（应等于 ${value.length}）`)
+
+      // Escape 关闭 + 焦点返回
+      await page.keyboard.press('Escape')
+      await page.waitForTimeout(500)
+      log(`Escape 关闭弹窗 = ${(await page.locator('.modal--copy').count()) === 0}`)
+      const focused = await page.evaluate(() => {
+        const el = document.activeElement
+        return el ? (el.textContent || '').trim().slice(0, 20) : '(无)'
+      })
+      log(`关闭后焦点元素 = ${focused}`)
+
+      // 关闭按钮也可用
+      await page.getByRole('button', { name: /复制结果摘要|已复制/ }).first().click()
+      await page.waitForTimeout(700)
+      log(`再次弹出 = ${(await page.locator('.modal--copy').count()) > 0}`)
+      await page.locator('.modal--copy .modal__close').click()
+      await page.waitForTimeout(400)
+      log(`关闭按钮生效 = ${(await page.locator('.modal--copy').count()) === 0}`)
+    }
+
+    // ================= 3. 重新测试后不残留旧摘要 =================
+    log('\n===== 【3】重新测试后不残留旧摘要 =====')
+    const beforeText = await page.evaluate(() => {
+      const el = document.querySelector('.modal__textarea')
+      return el ? el.value : '(已关闭)'
+    })
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: { writeText: () => Promise.reject(new Error('模拟失败')) },
+      })
+      document.execCommand = () => false
+    })
+    await page.getByRole('button', { name: '重新测试' }).click()
+    await page.waitForSelector('.page--quiz')
+    await page.waitForTimeout(500)
+    log(`重新测试后进入答题页 = ${(await page.locator('.page--quiz').count()) > 0}`)
+    log(`重新测试后手动复制窗口已关闭 = ${(await page.locator('.modal--copy').count()) === 0}`)
+
+    // 答完 20 题后看新结果（选项本轮已洗牌，不假定某一位置就是最高分）
+    for (let i = 0; i < 20; i += 1) {
+      const count = await page.locator('.q-option').count()
+      await page.locator('.q-option').nth(i % count === 0 ? 0 : 2).click()
+      await page.waitForTimeout(520)
+    }
+    await page.getByRole('button', { name: /查看我的脑腐段位/ }).click()
+    await page.waitForSelector('.page--result')
+    await page.waitForTimeout(1200)
+    const newTotalText = (await page.locator('.score-card__value').innerText()).replace(/\s+/g, '')
+    const newTotalNum = newTotalText.split('/')[0].trim()
+    log(`新结果总分 = ${newTotalText}`)
+    await page.getByRole('button', { name: /复制结果摘要/ }).click()
+    await page.waitForTimeout(800)
+    const afterText = await page.locator('.modal__textarea').inputValue().catch(() => '(未弹出)')
+    log(`新窗口摘要含新总分 = ${afterText.includes(`${newTotalNum} / 60`)}`)
+    log(`新摘要与旧摘要不同 = ${afterText !== beforeText}`)
+    await page.keyboard.press('Escape')
+    await page.waitForTimeout(400)
+
+    // ================= 4. 下载反馈（桌面） =================
+    log('\n===== 【4】下载反馈（桌面） =====')
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'userAgent', {
+        configurable: true,
+        get: () => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
+      })
+    })
+    await page.getByRole('button', { name: /保存分享图/ }).click()
+    await page.waitForTimeout(2200)
+    const dlToast = await page.locator('.toast__text').first().innerText().catch(() => '无')
+    log(`Toast = ${dlToast}`)
+    log(`提示改为「已发起下载」= ${dlToast.includes('已发起图片下载')}`)
+    log(`未声称保存成功 = ${!dlToast.includes('已保存')}`)
+    const previewLink = await page.locator('.share-preview-link').count()
+    log(`保留「查看已生成的分享图」入口 = ${previewLink > 0}`)
+    if (previewLink > 0) {
+      await page.locator('.share-preview-link').click()
+      await page.waitForTimeout(700)
+      const imgOk = await page.locator('.modal__img').evaluate(el => el.naturalWidth > 100 && el.naturalHeight > 300).catch(() => false)
+      const size = await page.locator('.modal__img').evaluate(el => `${el.naturalWidth}×${el.naturalHeight}`).catch(() => '无')
+      log(`预览图可用 = ${imgOk}（${size}）`)
+      await page.locator('.modal__close').first().click()
+      await page.waitForTimeout(400)
+    }
+
+    // ================= 5. 移动端预览长按保存 =================
+    log('\n===== 【5】移动端预览 =====')
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'userAgent', {
+        configurable: true,
+        get: () => 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1',
+      })
+    })
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.waitForTimeout(400)
+    await page.getByRole('button', { name: /保存分享图/ }).click()
+    await page.waitForTimeout(2000)
+    const mToast = await page.locator('.toast__text').first().innerText().catch(() => '无')
+    const mModal = (await page.locator('.modal__img').count()) > 0
+    log(`Toast = ${mToast}`)
+    log(`弹出预览 = ${mModal}`)
+    log(`提示 = ${mModal ? await page.locator('.modal__title').innerText() : '无'}`)
+    if (mModal) {
+      const box = await page.locator('.modal__body').evaluate(el => {
+        const r = el.getBoundingClientRect()
+        return { y: Math.round(r.y), h: Math.round(r.height), vh: window.innerHeight }
+      })
+      log(`弹窗位置 y=${box.y} 高=${box.h} 视口=${box.vh} → 可见 = ${box.y >= 0 && box.y < box.vh}`)
+      await page.locator('.modal__close').first().click()
+      await page.waitForTimeout(300)
+    }
+
+    // ================= 6. 生成失败时不显示成功 =================
+    log('\n===== 【6】图片生成失败反馈 =====')
+    await page.setViewportSize({ width: 1280, height: 900 })
+    // 先换一份新结果，清掉上一次已缓存的分享图，确保重新走生成流程
+    await page.evaluate(() => {
+      localStorage.setItem('brainrot.result.v1', JSON.stringify({
+        total: 44, createdAt: 1700000000999,
+        dimensions: ['shortvideo', 'slang', 'attention', 'cocoon', 'cyber']
+          .map((key, i) => ({ key, score: [8, 9, 9, 9, 9][i] })),
+      }))
+      localStorage.setItem('brainrot.stage.v1', 'result')
+    })
+    await page.reload({ waitUntil: 'networkidle' })
+    await page.waitForSelector('.page--result')
+    await page.waitForTimeout(800)
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'userAgent', {
+        configurable: true,
+        get: () => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
+      })
+      // 让 canvas 导出直接抛错，模拟生成失败
+      HTMLCanvasElement.prototype.toDataURL = function () { throw new Error('模拟导出失败') }
+    })
+    await page.waitForTimeout(3000) // 清掉残留 Toast
+    await page.getByRole('button', { name: /保存分享图/ }).click()
+    await page.waitForTimeout(1800)
+    const errToast = await page.locator('.toast__text').last().innerText().catch(() => '无')
+    log(`Toast = ${errToast}`)
+    log(`显示失败而非成功 = ${errToast.includes('失败') && !errToast.includes('已发起') && !errToast.includes('已保存')}`)
+    log(`失败时不弹预览 = ${(await page.locator('.modal__img').count()) === 0}`)
+
+    log(`\n[控制台] 错误数 = ${errors.length}`)
+    errors.slice(0, 6).forEach(e => log(`   · ${e}`))
+  } catch (e) {
+    log(`\n[中断] ${e.message.split('\n')[0]}`)
+    log(`[控制台] 错误数 = ${errors.length}`)
+    errors.slice(0, 6).forEach(x => log(`   · ${x}`))
+  }
+
+  return out.join('\n')
+}
+)(page);
+```
+### Page
+- Page URL: http://localhost:5173/rot-brain/
+- Page Title: 脑腐指数测试 - 你的大脑被互联网腌入味了吗？
+- Console: 1 errors, 0 warnings
+### Events
+- New console entries: .playwright-cli\console-2026-10-20T15-23-44-803Z.log#L81-L88
+- Downloading file 脑腐指数-充分煮熟体-40分.png ...
+- Downloaded file 脑腐指数-充分煮熟体-40分.png to ".playwright-cli\脑腐指数-充分煮熟体-40分.png"
+
+=== 6. 浏览器：回归与留档 ===
+### Result
+"===== 【A】一键分享兜底 =====\n一键分享兜底弹出手动复制窗口 = false\n\n===== 【B】随机抽题 / 刷新续答 / 图鉴返回 =====\n第一轮题数 = 20，前5题 = 56,40,54,58,16\n答了5题后位置 = 第6/20题\n刷新后仍在答题页 = true\n刷新后题组不变 = true\n刷新后位置 = 第6/20题\n首页文案显示继续 = 🫠\n继续上次测试（5/20）\n图鉴卡数 = 8\n从首页进图鉴可返回首页 = true\n答题中进图鉴的返回按钮 = ←返回继续答题\n返回后位置一致 = true（第6/20题 → 第6/20题）\n返回后题目一致 = true\n返回后已选答案保留 = true\n重抽后题数 = 20；与上一轮重复题数 = 0（题库60可保证0）\n\n===== 【C】分享图与文件名 =====\n触发下载 = true；文件名 = 脑腐指数-中度入味体-35分.png\n文件名含统一后的名称 = true\nToast = 已发起图片下载，请查看浏览器下载列表。\n预览图尺寸 = 750×2170\n\n===== 【D】留档截图 =====\n已保存 final-result-1440 / final-result-low-1440 / final-result-320 / final-codex-320 / final-codex-390\n\n[控制台] 错误数 = 0"
+### Ran Playwright code
+```js
+await (/**
+ * 回归与留档（开发用，不参与打包）。
+ * 执行：playwright-cli run-code --filename=scripts/final-check.cjs
+ */
+async (page) => {
+  const out = []
+  const log = (m) => out.push(m)
+  const errors = []
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
+  page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`))
+
+  const BASE = 'http://localhost:5173/rot-brain/'
+  const DIM_KEYS = ['shortvideo', 'slang', 'attention', 'cocoon', 'cyber']
+
+  try {
+    const showResult = async (scores, createdAt = 1700000000000) => {
+      const dimensions = DIM_KEYS.map((key, i) => ({ key, score: scores[i] }))
+      const total = scores.reduce((a, b) => a + b, 0)
+      await page.evaluate(([dims, t, c]) => {
+        localStorage.setItem('brainrot.result.v1', JSON.stringify({ total: t, dimensions: dims, createdAt: c }))
+        localStorage.setItem('brainrot.stage.v1', 'result')
+        localStorage.removeItem('brainrot.session.v2')
+        localStorage.removeItem('brainrot.answers.v1')
+      }, [dimensions, total, createdAt])
+      await page.reload({ waitUntil: 'networkidle' })
+      await page.waitForSelector('.page--result', { timeout: 15000 })
+      await page.waitForTimeout(700)
+    }
+
+    // ===== A. 一键分享的复制兜底 =====
+    log('===== 【A】一键分享兜底 =====')
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await page.goto(BASE, { waitUntil: 'networkidle' })
+    await showResult([9, 9, 9, 9, 9])
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true, value: { writeText: () => Promise.reject(new Error('模拟失败')) },
+      })
+      document.execCommand = () => false
+    })
+    await page.getByRole('button', { name: /一键分享/ }).click()
+    await page.waitForTimeout(900)
+    const m = await page.locator('.modal--copy').count()
+    log(`一键分享兜底弹出手动复制窗口 = ${m > 0}`)
+    if (m > 0) {
+      log(`标题 = ${await page.locator('.modal__heading').innerText()}`)
+      const v = await page.locator('.modal__textarea').inputValue()
+      log(`摘要含当前段位 = ${v.includes('油炸酥脆体')}，含总分45 = ${v.includes('45 / 60')}`)
+      await page.screenshot({ path: '.playwright-cli/final-manual-copy-desktop.png' })
+      await page.keyboard.press('Escape')
+      await page.waitForTimeout(400)
+      log(`Escape 关闭 = ${(await page.locator('.modal--copy').count()) === 0}`)
+    }
+
+    // ===== B. 随机抽题 + 刷新续答 + 图鉴返回原题 =====
+    log('\n===== 【B】随机抽题 / 刷新续答 / 图鉴返回 =====')
+    await page.evaluate(() => localStorage.clear())
+    await page.goto(BASE, { waitUntil: 'networkidle' })
+    await page.waitForTimeout(600)
+    const round1Ids = await page.evaluate(() => {
+      const btn = [...document.querySelectorAll('button')].find(b => /开始测试|再测一次/.test(b.textContent || ''))
+      btn.click()
+      return null
+    })
+    void round1Ids
+    await page.waitForSelector('.page--quiz')
+    await page.waitForTimeout(500)
+    const ids1 = await page.evaluate(() => JSON.parse(localStorage.getItem('brainrot.session.v2')).questionIds)
+    log(`第一轮题数 = ${ids1.length}，前5题 = ${ids1.slice(0, 5).join(',')}`)
+
+    for (let i = 0; i < 5; i += 1) {
+      await page.locator('.q-option').nth(0).click()
+      await page.waitForTimeout(520)
+    }
+    const before = await page.locator('.q-header__count').innerText()
+    log(`答了5题后位置 = ${before.replace(/\s+/g, '')}`)
+
+    await page.reload({ waitUntil: 'networkidle' })
+    await page.waitForTimeout(900)
+    const onQuiz = (await page.locator('.page--quiz').count()) > 0
+    const idsAfter = await page.evaluate(() => JSON.parse(localStorage.getItem('brainrot.session.v2')).questionIds)
+    const after = await page.locator('.q-header__count').innerText().catch(() => '无')
+    log(`刷新后仍在答题页 = ${onQuiz}`)
+    log(`刷新后题组不变 = ${JSON.stringify(ids1) === JSON.stringify(idsAfter)}`)
+    log(`刷新后位置 = ${after.replace(/\s+/g, '')}`)
+    log(`首页文案显示继续 = ${(await page.evaluate(() => {
+      localStorage.setItem('brainrot.stage.v1', 'home'); return true
+    })) ? await (async () => { await page.reload({ waitUntil: 'networkidle' }); await page.waitForTimeout(600)
+      const b = await page.locator('.btn--xl').innerText(); return b })() : ''}`)
+
+    // 从首页进入图鉴再返回
+    await page.locator('.topbar__codex').click()
+    await page.waitForSelector('.page--codex')
+    await page.waitForTimeout(400)
+    log(`图鉴卡数 = ${await page.locator('.codex-card').count()}`)
+    await page.locator('.codex-back').click()
+    await page.waitForSelector('.page--home')
+    await page.waitForTimeout(400)
+    log(`从首页进图鉴可返回首页 = ${(await page.locator('.page--home').count()) > 0}`)
+
+    // 继续答题 → 进入图鉴 → 返回原题
+    await page.locator('.btn--xl').click()
+    await page.waitForSelector('.page--quiz')
+    await page.waitForTimeout(400)
+    const posBefore = await page.locator('.q-header__count').innerText()
+    const titleBefore = await page.locator('.q-title').innerText()
+    await page.locator('.topbar__codex').click()
+    await page.waitForSelector('.page--codex')
+    await page.waitForTimeout(400)
+    const backLabel = await page.locator('.codex-back').innerText()
+    log(`答题中进图鉴的返回按钮 = ${backLabel.replace(/\s+/g, '')}`)
+    await page.locator('.codex-back').click()
+    await page.waitForSelector('.page--quiz')
+    await page.waitForTimeout(400)
+    const posAfter = await page.locator('.q-header__count').innerText()
+    const titleAfter = await page.locator('.q-title').innerText()
+    log(`返回后位置一致 = ${posBefore === posAfter}（${posBefore.replace(/\s+/g, '')} → ${posAfter.replace(/\s+/g, '')}）`)
+    log(`返回后题目一致 = ${titleBefore === titleAfter}`)
+    log(`返回后已选答案保留 = ${(await page.locator('.q-option--selected').count()) >= 0}`)
+
+    // 重新抽题：相邻两轮不重复
+    await page.evaluate(() => localStorage.setItem('brainrot.stage.v1', 'home'))
+    await page.reload({ waitUntil: 'networkidle' })
+    await page.waitForTimeout(600)
+    const restart = page.getByRole('button', { name: /重新抽取20题/ })
+    if (await restart.count() > 0) {
+      await restart.click()
+      await page.waitForTimeout(300)
+      await page.getByRole('button', { name: '确认重新抽题' }).click()
+      await page.waitForTimeout(700)
+    }
+    const ids2 = await page.evaluate(() => JSON.parse(localStorage.getItem('brainrot.session.v2')).questionIds)
+    const overlap = ids2.filter(id => ids1.includes(id)).length
+    log(`重抽后题数 = ${ids2.length}；与上一轮重复题数 = ${overlap}（题库60可保证0）`)
+
+    // ===== C. 分享图文件名含新名称 =====
+    log('\n===== 【C】分享图与文件名 =====')
+    await showResult([7, 7, 7, 7, 7]) // 35 分 → 中度入味体
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'userAgent', {
+        configurable: true,
+        get: () => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
+      })
+    })
+    const dlPromise = page.waitForEvent('download', { timeout: 20000 }).catch(() => null)
+    await page.getByRole('button', { name: /保存分享图/ }).click()
+    const dl = await dlPromise
+    log(`触发下载 = ${!!dl}；文件名 = ${dl ? dl.suggestedFilename() : '无'}`)
+    log(`文件名含统一后的名称 = ${dl ? dl.suggestedFilename().includes('中度入味体') : false}`)
+    await page.waitForTimeout(1500)
+    log(`Toast = ${await page.locator('.toast__text').last().innerText().catch(() => '无')}`)
+    await page.locator('.share-preview-link').click()
+    await page.waitForTimeout(800)
+    const size = await page.locator('.modal__img').evaluate(el => `${el.naturalWidth}×${el.naturalHeight}`).catch(() => '无')
+    log(`预览图尺寸 = ${size}`)
+    await page.screenshot({ path: '.playwright-cli/final-share-preview.png' })
+    await page.locator('.modal__close').first().click()
+    await page.waitForTimeout(400)
+
+    // ===== D. 留档截图 =====
+    log('\n===== 【D】留档截图 =====')
+    await showResult([7, 7, 7, 7, 7])
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.waitForTimeout(400)
+    await page.screenshot({ path: '.playwright-cli/final-result-1440.png', fullPage: true })
+    await showResult([4, 4, 4, 4, 4])
+    await page.waitForTimeout(400)
+    await page.screenshot({ path: '.playwright-cli/final-result-low-1440.png', fullPage: true })
+    await page.setViewportSize({ width: 320, height: 860 })
+    await showResult([12, 12, 12, 12, 12])
+    await page.waitForTimeout(400)
+    await page.screenshot({ path: '.playwright-cli/final-result-320.png', fullPage: true })
+    await page.locator('.topbar__codex').click()
+    await page.waitForSelector('.page--codex')
+    await page.waitForTimeout(500)
+    await page.screenshot({ path: '.playwright-cli/final-codex-320.png', fullPage: true })
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.waitForTimeout(400)
+    await page.screenshot({ path: '.playwright-cli/final-codex-390.png', fullPage: true })
+    log('已保存 final-result-1440 / final-result-low-1440 / final-result-320 / final-codex-320 / final-codex-390')
+
+    log(`\n[控制台] 错误数 = ${errors.length}`)
+    errors.slice(0, 6).forEach(e => log(`   · ${e}`))
+  } catch (e) {
+    log(`\n[中断] ${e.message.split('\n')[0]}`)
+    log(`[控制台] 错误数 = ${errors.length}`)
+    errors.slice(0, 6).forEach(x => log(`   · ${x}`))
+  }
+
+  return out.join('\n')
+}
+)(page);
+```
+### Page
+- Page URL: http://localhost:5173/rot-brain/
+- Page Title: 脑腐指数测试 - 你的大脑被互联网腌入味了吗？
+### Events
+- New console entries: .playwright-cli\console-2026-10-20T15-23-44-803Z.log#L89-L98
+- Downloading file 脑腐指数-中度入味体-35分.png ...
+- Downloaded file 脑腐指数-中度入味体-35分.png to ".playwright-cli\脑腐指数-中度入味体-35分.png"
+
+=== 7. 一键分享兜底（移除 navigator.share 后） ===
+说明：本轮 Chromium 存在 navigator.share，故上面【A】走了系统分享分支；以下为移除 navigator.share 后强制走复制兜底的结果。
+### Result
+"弹出手动复制窗口 = true\n标题 = 手动复制结果摘要\nToast = 分享和自动复制都失败了，已打开手动复制窗口\n摘要含当前段位 = true，含总分45 = true\nEscape关闭 = true\n焦点返回 = 🔗 一键分享"
+### Ran Playwright code
+```js
+await (async page => { const o=[]; const l=m=>o.push(m); await page.setViewportSize({width:1280,height:900}); await page.goto('http://localhost:5173/rot-brain/',{waitUntil:'networkidle'}); await page.evaluate(()=>{localStorage.setItem('brainrot.result.v1',JSON.stringify({total:45,createdAt:1700000000000,dimensions:['shortvideo','slang','attention','cocoon','cyber'].map(k=>({key:k,score:9}))}));localStorage.setItem('brainrot.stage.v1','result')}); await page.reload({waitUntil:'networkidle'}); await page.waitForSelector('.page--result'); await page.waitForTimeout(700); await page.evaluate(()=>{ Object.defineProperty(navigator,'share',{configurable:true,value:undefined}); Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:()=>Promise.reject(new Error('x'))}}); document.execCommand=()=>false }); await page.waitForTimeout(2800); await page.getByRole('button',{name:/一键分享/}).click(); await page.waitForTimeout(900); l('弹出手动复制窗口 = ' + (await page.locator('.modal--copy').count()>0)); l('标题 = ' + await page.locator('.modal__heading').innerText().catch(()=>'无')); l('Toast = ' + await page.locator('.toast__text').last().innerText().catch(()=>'无')); const v = await page.locator('.modal__textarea').inputValue().catch(()=>''); l('摘要含当前段位 = ' + v.includes('油炸酥脆体') + '，含总分45 = ' + v.includes('45 / 60')); await page.keyboard.press('Escape'); await page.waitForTimeout(500); l('Escape关闭 = ' + ((await page.locator('.modal--copy').count())===0)); l('焦点返回 = ' + await page.evaluate(()=>{const e=document.activeElement;return e?(e.textContent||'').trim().slice(0,20):'(无)'})); return o.join('\n'); })(page);
+```
+### Events
+- New console entries: .playwright-cli\console-2026-10-20T15-23-44-803Z.log#L99-L100

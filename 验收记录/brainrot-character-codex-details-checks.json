@@ -1,0 +1,50 @@
+[
+  {
+    "descriptionLength": 67,
+    "image": "/rot-brain/characters/pure.webp",
+    "imageLoaded": true,
+    "name": "数字净土人"
+  },
+  {
+    "descriptionLength": 58,
+    "image": "/rot-brain/characters/tourist.webp",
+    "imageLoaded": true,
+    "name": "浅尝辄止体"
+  },
+  {
+    "descriptionLength": 62,
+    "image": "/rot-brain/characters/casual.webp",
+    "imageLoaded": true,
+    "name": "轻度腌制体"
+  },
+  {
+    "descriptionLength": 62,
+    "image": "/rot-brain/characters/marinated.webp",
+    "imageLoaded": true,
+    "name": "半熟冲浪手"
+  },
+  {
+    "descriptionLength": 77,
+    "image": "/rot-brain/characters/cooked.webp",
+    "imageLoaded": true,
+    "name": "深度入味体"
+  },
+  {
+    "descriptionLength": 71,
+    "image": "/rot-brain/characters/deepfried.webp",
+    "imageLoaded": true,
+    "name": "重度发酵体"
+  },
+  {
+    "descriptionLength": 66,
+    "image": "/rot-brain/characters/fermented.webp",
+    "imageLoaded": true,
+    "name": "算法共生体"
+  },
+  {
+    "descriptionLength": 79,
+    "image": "/rot-brain/characters/ascended.webp",
+    "imageLoaded": true,
+    "name": "脑腐飞升体"
+  }
+]

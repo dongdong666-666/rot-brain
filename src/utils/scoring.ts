@@ -1,7 +1,16 @@
 import { DIMENSIONS, DIMENSION_MAX, DIMENSION_MIN, type DimensionKey } from '../data/dimensions'
 import { LEGACY_QUESTION_IDS, QUESTION_MAP } from '../data/questions'
 import { TOTAL_MAX, TOTAL_MIN, getTier, type Tier } from '../data/tiers'
-import { ADVICE, GENERAL_ADVICE_HIGH, GENERAL_ADVICE_LOW, GENERAL_ADVICE_MID } from '../data/advice'
+import {
+  ADVICE,
+  ADVICE_BAND_ACTION_MIN,
+  ADVICE_BAND_GENTLE_MIN,
+  CONSISTENCY_NOTE,
+  GENERAL_CLOSING_KEEP,
+  GENERAL_CLOSING_MULTI,
+  GENERAL_CLOSING_SINGLE,
+  type AdviceBand,
+} from '../data/advice'
 import { isValidAnswer, isValidQuestionSet } from './session'
 
 /** 题目 ID -> 原始选项下标；展示顺序变化不影响计分。 */
@@ -35,11 +44,45 @@ function pickTopTwo(dimensions: DimensionScore[]) {
   const top = sorted.filter((dim) => dim.score >= secondScore)
   return { top, hasTie: sorted[0].score === secondScore || top.length > 2 }
 }
-function buildAdvice(top: DimensionScore[], total: number): string[] {
-  const perDimension = top.length > 2 ? 1 : 2
-  const list = top.flatMap((dim) => ADVICE[dim.key].slice(0, perDimension))
-  const general = total <= 29 ? GENERAL_ADVICE_LOW : total <= 44 ? GENERAL_ADVICE_MID : GENERAL_ADVICE_HIGH
-  return Array.from(new Set([...list, ...general]))
+/** 维度得分对应的文案层次：4—6 维持、7—9 温和、10—12 行动。 */
+export function adviceBandOf(score: number): AdviceBand {
+  if (score >= ADVICE_BAND_ACTION_MIN) return 'action'
+  if (score >= ADVICE_BAND_GENTLE_MIN) return 'gentle'
+  return 'keep'
+}
+
+/**
+ * 按「各维度实际得分」挑选建议，而不是只按排名机械取前两名。
+ * - 得分进入 7 分以上的维度才给调整类建议；
+ * - 全部维度都在 4—6 分时，只给肯定与维持，不凭空断言问题；
+ * - 总分低但某维度偏高时，仍会给该维度的相关建议；
+ * - 输出控制在 3—5 条，去重后按数量截断。
+ * 分层只影响文案选择，不参与分数、进度条和段位计算。
+ */
+export function buildAdvice(dimensions: DimensionScore[]): string[] {
+  if (dimensions.length === 0) return []
+  const ranked = [...dimensions].sort((a, b) => b.score - a.score)
+  const allEqual = dimensions.every((d) => d.score === dimensions[0].score)
+  const actionable = ranked.filter((d) => d.score >= ADVICE_BAND_GENTLE_MIN)
+  const list: string[] = []
+
+  if (actionable.length === 0) {
+    // 全部处在较低区间：只给维持与肯定
+    list.push(...ADVICE[ranked[0].key].keep.slice(0, 2))
+    if (ranked[1] && ranked[1].score >= ranked[0].score - 1) {
+      list.push(ADVICE[ranked[1].key].keep[0])
+    }
+    list.push(GENERAL_CLOSING_KEEP)
+  } else {
+    const first = actionable[0]
+    list.push(...ADVICE[first.key][adviceBandOf(first.score)].slice(0, 2))
+    const second = actionable[1]
+    if (second) list.push(ADVICE[second.key][adviceBandOf(second.score)][0])
+    list.push(actionable.length > 1 ? GENERAL_CLOSING_MULTI : GENERAL_CLOSING_SINGLE)
+  }
+
+  if (allEqual) list.unshift(CONSISTENCY_NOTE[adviceBandOf(dimensions[0].score)])
+  return Array.from(new Set(list)).slice(0, 5)
 }
 function buildResult(scores: Record<DimensionKey, number>, createdAt: number): TestResult {
   const dimensions = DIMENSIONS.map((dim) => ({
@@ -51,7 +94,7 @@ function buildResult(scores: Record<DimensionKey, number>, createdAt: number): T
   return {
     total, progress: Math.round(((total - TOTAL_MIN) / (TOTAL_MAX - TOTAL_MIN)) * 1000) / 10,
     tier: getTier(total), dimensions, topDimensions: top, hasTie,
-    advice: buildAdvice(top, total), createdAt,
+    advice: buildAdvice(dimensions), createdAt,
   }
 }
 /** 只计算本轮抽中的 20 题；非法题组、漏答、非法选项均不生成结果。 */
