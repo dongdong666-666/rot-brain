@@ -10,6 +10,7 @@ import {
   renderResultImage,
 } from '../utils/share'
 import ShareModal from './ShareModal'
+import { getPortraitUrl } from '../utils/portraits'
 
 interface ResultProps {
   result: TestResult
@@ -26,6 +27,7 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
   const [generating, setGenerating] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [revealed, setRevealed] = useState(false)
+  const [portraitFailed, setPortraitFailed] = useState(false)
   const barsRef = useRef<HTMLDivElement | null>(null)
 
   // 进度条入场动画
@@ -38,6 +40,7 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
   useEffect(() => {
     setImageUrl('')
     setCopied(false)
+    setPortraitFailed(false)
   }, [result.createdAt])
 
   const handleCopy = useCallback(async () => {
@@ -120,10 +123,20 @@ export default function Result({ result, onRetest, onHome, notify }: ResultProps
         <div className="tier-card__glow" aria-hidden="true" />
         <p className="tier-card__eyebrow">Your Brain Rot Tier</p>
 
-        <div className="tier-card__icon-wrap">
-          <span className="tier-card__icon">{tier.icon}</span>
-          <span className="tier-card__pulse" aria-hidden="true" />
-        </div>
+        <figure className="tier-card__portrait">
+          {portraitFailed ? (
+            <div className="tier-card__portrait-fallback" role="img" aria-label={tier.name + '段位图标'}>
+              <span>{tier.icon}</span>
+              <p>人物画像暂时无法显示</p>
+            </div>
+          ) : (
+            <img key={tier.portrait} src={getPortraitUrl(tier)} width={768} height={768}
+              alt={tier.name + '段位人物画像'} decoding="async" onError={() => setPortraitFailed(true)} />
+          )}
+        </figure>
+        <p className="tier-card__portrait-credit">
+          <a href="https://www.testwhat.com/brainrot-types.html" target="_blank" rel="noopener noreferrer">人物画像：TestWhat</a>
+        </p>
 
         <p className="tier-card__level">
           第 {tier.level} / 8 段位 · {tier.enName}

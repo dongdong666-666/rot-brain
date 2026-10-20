@@ -1,0 +1,64 @@
+{
+  "sourcePage": "https://www.testwhat.com/brainrot.html",
+  "galleryPage": "https://www.testwhat.com/brainrot-types.html",
+  "sourceData": "https://www.testwhat.com/brainrot-types-data.js?v=4",
+  "retrievedOn": "2026-10-20",
+  "images": [
+    {
+      "level": 1,
+      "file": "characters/pure.webp",
+      "url": "https://www.testwhat.com/brainrot-chars/pure.webp",
+      "bytes": 44190,
+      "sha256": "25a7e87f5afcdf5030c20a2d265e4648a1f6edda46808dc52555d32c1f96ba89"
+    },
+    {
+      "level": 2,
+      "file": "characters/tourist.webp",
+      "url": "https://www.testwhat.com/brainrot-chars/tourist.webp",
+      "bytes": 28636,
+      "sha256": "06d01d9ca6d2eed56a54f40109ed0bc3166f39b5cc4a67e3d048de67d6e89c3f"
+    },
+    {
+      "level": 3,
+      "file": "characters/casual.webp",
+      "url": "https://www.testwhat.com/brainrot-chars/casual.webp",
+      "bytes": 31098,
+      "sha256": "d3e20b50755f9e63b414b1aee8aaac129ab4dd13142eb52f98f4f4b4fba1eb8d"
+    },
+    {
+      "level": 4,
+      "file": "characters/marinated.webp",
+      "url": "https://www.testwhat.com/brainrot-chars/marinated.webp",
+      "bytes": 55692,
+      "sha256": "84194a92cd4d6def6a51d6cb40abf1398a0d7e56027464ee12c223fd67827d83"
+    },
+    {
+      "level": 5,
+      "file": "characters/cooked.webp",
+      "url": "https://www.testwhat.com/brainrot-chars/cooked.webp",
+      "bytes": 59124,
+      "sha256": "e9f21a4a159359a80e8ff07a3beda4a0ff3fa7940835e323ef7666207db97826"
+    },
+    {
+      "level": 6,
+      "file": "characters/deepfried.webp",
+      "url": "https://www.testwhat.com/brainrot-chars/deepfried.webp",
+      "bytes": 38022,
+      "sha256": "3da4d0cd847ba5d0a7842bc06adb8bf1d970e3be8b8db45a4ed50c68b2eed7c9"
+    },
+    {
+      "level": 7,
+      "file": "characters/fermented.webp",
+      "url": "https://www.testwhat.com/brainrot-chars/fermented.webp",
+      "bytes": 60952,
+      "sha256": "b7b31254c1877c59b6ae127fa4d2d3ea9f6d9efc1dd237a1a95740007918ec2a"
+    },
+    {
+      "level": 8,
+      "file": "characters/ascended.webp",
+      "url": "https://www.testwhat.com/brainrot-chars/ascended.webp",
+      "bytes": 46020,
+      "sha256": "85c0f63ea0d191d7433db9b9f49d2cb0a0ad7ddedb27ef70b9649393e715fe93"
+    }
+  ]
+}

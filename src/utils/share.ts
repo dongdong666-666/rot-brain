@@ -1,6 +1,7 @@
 import { DISCLAIMER } from '../data/advice'
 import { TOTAL_MAX } from '../data/tiers'
 import type { TestResult } from './scoring'
+import { loadPortraitImage } from './portraits'
 
 /** 中文字体栈，DOM 与 Canvas 共用，保证导出图片里中文正常 */
 const CJK_FONT =
@@ -149,6 +150,11 @@ const PADDING = 48
  */
 export async function renderResultImage(result: TestResult): Promise<string> {
   const { tier, total, progress, dimensions, topDimensions, hasTie, advice } = result
+  const [portrait] = await Promise.all([
+    loadPortraitImage(tier),
+    document.fonts?.ready.catch(() => undefined),
+  ])
+  const portraitSize = 360
 
   const canvas = document.createElement('canvas')
   const dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -163,7 +169,7 @@ export async function renderResultImage(result: TestResult): Promise<string> {
 
   // 固定区块高度预估
   contentH += 46 // 顶部小标题
-  contentH += 132 // 段位图标 + 名称
+  contentH += portraitSize + 118 // 人物画像 + 段位名称
   contentH += 44 // 英文副标题
   contentH += 56 // 评语
   contentH += 120 // 总分条
@@ -233,16 +239,35 @@ export async function renderResultImage(result: TestResult): Promise<string> {
   ctx.fillText('脑腐指数测试 · Brain Rot Index', PADDING, y)
   y += 46
 
-  // ---------- 段位图标 ----------
-  ctx.font = '64px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif'
-  ctx.fillText(tier.icon, PADDING, y)
-  ctx.font = `600 30px ${CJK_FONT}`
+  // ---------- 与网页一致的段位人物画像 ----------
+  const portraitX = (CARD_W - portraitSize) / 2
+  ctx.save()
+  roundRect(ctx, portraitX, y, portraitSize, portraitSize, 24)
+  ctx.clip()
+  ctx.fillStyle = '#f5f5f3'
+  ctx.fillRect(portraitX, y, portraitSize, portraitSize)
+  if (portrait) {
+    const ratio = Math.min(portraitSize / portrait.naturalWidth, portraitSize / portrait.naturalHeight)
+    const drawWidth = portrait.naturalWidth * ratio
+    const drawHeight = portrait.naturalHeight * ratio
+    ctx.drawImage(portrait, portraitX + (portraitSize - drawWidth) / 2, y + (portraitSize - drawHeight) / 2, drawWidth, drawHeight)
+  } else {
+    ctx.font = '100px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText(tier.icon, CARD_W / 2, y + 125)
+  }
+  ctx.restore()
+  y += portraitSize + 22
+  ctx.textAlign = 'center'
+  ctx.font = `600 26px ${CJK_FONT}`
   ctx.fillStyle = 'rgba(255,255,255,0.7)'
-  ctx.fillText(`第 ${tier.level} / 8 段位`, PADDING + 88, y + 6)
+  ctx.fillText(`第 ${tier.level} / 8 段位`, CARD_W / 2, y)
+  y += 34
   ctx.font = `700 44px ${CJK_FONT}`
   ctx.fillStyle = '#ffffff'
-  ctx.fillText(tier.name, PADDING + 88, y + 44)
-  y += 124
+  ctx.fillText(tier.name, CARD_W / 2, y)
+  y += 62
+  ctx.textAlign = 'left'
 
   // ---------- 英文副标题 ----------
   ctx.font = `400 22px ${CJK_FONT}`
@@ -356,6 +381,8 @@ export async function renderResultImage(result: TestResult): Promise<string> {
   ctx.font = `400 20px ${CJK_FONT}`
   ctx.fillStyle = 'rgba(255,255,255,0.38)'
   ctx.fillText('脑腐指数测试 · 仅供娱乐和自我观察，不是医学诊断。', PADDING, footY)
+  ctx.font = `400 18px ${CJK_FONT}`
+  ctx.fillText('人物画像：TestWhat · testwhat.com', PADDING, footY + 30)
 
   return canvas.toDataURL('image/png')
 }

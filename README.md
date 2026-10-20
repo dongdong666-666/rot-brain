@@ -1,5 +1,31 @@
 # 脑腐指数测试 · Brain Rot Index
 
+## 2026-10-20 人物画像更新
+
+结果卡与分享图均加入TestWhat原站使用的八张低多边形立体人物画像，第一档为坐在树干上阅读的人物。
+保持现有段位名称和分数区间，按八档顺序对应原站图片；画像不参与计分，不改变60题库和每轮20题的规则。
+图片已保存至 `public/characters/`，网页和Canvas均读取本地同源文件，兼容 `/rot-brain/` 部署前缀。
+图片加载失败时显示段位图标回退，不影响结果与导出。网页与分享图均保留来源署名。
+
+| 分数 | 本项目段位 | 原站画像文件 |
+| --- | --- | --- |
+| 20—24 | 数字净土人 | pure.webp |
+| 25—29 | 浅尝辄止体 | tourist.webp |
+| 30—34 | 轻度腌制体 | casual.webp |
+| 35—39 | 半熟冲浪手 | marinated.webp |
+| 40—44 | 深度入味体 | cooked.webp |
+| 45—49 | 重度发酵体 | deepfried.webp |
+| 50—54 | 算法共生体 | fermented.webp |
+| 55—60 | 脑腐飞升体 | ascended.webp |
+
+来源：[TestWhat脑腐测试](https://www.testwhat.com/brainrot.html)、[原站段位图鉴](https://www.testwhat.com/brainrot-types.html)。
+获取日期为2026-10-20；逐张原始URL、文件大小和SHA-256保存在 `public/characters/sources.json`。
+这些是引用的原站素材，不标为本项目原创。
+本轮修改前备份：`_backup/20261020_portraits_01/`。
+本轮类型检查、124项自检及生产构建通过；浏览器实际答完20题，第一档结果正确显示阅读人物，
+并导出带同一画像的750×2362分享图。八张本地WebP均成功解码为768×768，
+320/390/768/1440四档视口无横向溢出。截图与检查记录位于 `验收记录/brainrot-original-portraits-*`。
+
 娱乐向自测网站：首页 → 随机20题 → 五维分析与段位 → 本地分享图。
 保留原来的深紫霓虹风格、5个维度、8个段位与20—60分区间。无后端、登录或付费。
 
@@ -29,7 +55,7 @@ npm install
 npm run dev
 ```
 
-按终端显示的地址访问，默认 `http://localhost:5173/`。
+按终端显示的地址访问。当前Vite配置使用 `/rot-brain/` 前缀，对应 `http://localhost:5173/rot-brain/`；本次保留现有前缀设置。
 
 ```powershell
 npm run typecheck

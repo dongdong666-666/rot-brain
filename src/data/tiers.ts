@@ -16,8 +16,10 @@ export interface Tier {
   name: string
   /** 英文副标题 */
   enName: string
-  /** 段位图形（emoji，无外部图片依赖） */
+  /** 段位图标：画像加载失败时保留的回退。 */
   icon: string
+  /** 项目 public/ 下的本地人物画像，相对于站点 base。 */
+  portrait: string
   /** 简短评语 */
   tagline: string
   /** 详细描述 */
@@ -33,6 +35,7 @@ export const TIERS: Tier[] = [
     min: 20,
     max: 24,
     name: '数字净土人',
+    portrait: 'characters/pure.webp',
     enName: 'Digital Pure Land',
     icon: '🧊',
     tagline: '你的大脑还带着清晨的露水',
@@ -46,6 +49,7 @@ export const TIERS: Tier[] = [
     min: 25,
     max: 29,
     name: '浅尝辄止体',
+    portrait: 'characters/tourist.webp',
     enName: 'Light Dipper',
     icon: '🌱',
     tagline: '偶尔刷刷，随时能放下',
@@ -59,6 +63,7 @@ export const TIERS: Tier[] = [
     min: 30,
     max: 34,
     name: '轻度腌制体',
+    portrait: 'characters/casual.webp',
     enName: 'Lightly Pickled',
     icon: '🥒',
     tagline: '有点入味，还能抢救',
@@ -72,6 +77,7 @@ export const TIERS: Tier[] = [
     min: 35,
     max: 39,
     name: '半熟冲浪手',
+    portrait: 'characters/marinated.webp',
     enName: 'Half-Baked Surfer',
     icon: '🍳',
     tagline: '刷功熟练，专注力时好时坏',
@@ -85,6 +91,7 @@ export const TIERS: Tier[] = [
     min: 40,
     max: 44,
     name: '深度入味体',
+    portrait: 'characters/cooked.webp',
     enName: 'Deeply Marinated',
     icon: '🍜',
     tagline: '味道进去了，习惯也进去了',
@@ -98,6 +105,7 @@ export const TIERS: Tier[] = [
     min: 45,
     max: 49,
     name: '重度发酵体',
+    portrait: 'characters/deepfried.webp',
     enName: 'Fully Fermented',
     icon: '🫧',
     tagline: '情绪跟着 feed 上下浮动',
@@ -111,6 +119,7 @@ export const TIERS: Tier[] = [
     min: 50,
     max: 54,
     name: '算法共生体',
+    portrait: 'characters/fermented.webp',
     enName: 'Algorithm Symbiote',
     icon: '🛸',
     tagline: '你和推荐系统已经互相驯化',
@@ -124,6 +133,7 @@ export const TIERS: Tier[] = [
     min: 55,
     max: 60,
     name: '脑腐飞升体',
+    portrait: 'characters/ascended.webp',
     enName: 'Ascended Brain Rot',
     icon: '👽',
     tagline: '大脑已被互联网腌至入魂',

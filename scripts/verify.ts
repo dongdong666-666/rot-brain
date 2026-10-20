@@ -10,6 +10,7 @@ import { calculateResult, getAnsweredCount, isComplete, restoreResult, type Answ
 import { createSession, isValidQuestionSet, migrateLegacyAnswers, parseSession } from '../src/utils/session'
 import { loadSession, saveSession } from '../src/utils/storage'
 import { ADVICE } from '../src/data/advice'
+import { existsSync, readFileSync } from 'node:fs'
 
 const QUESTIONS = LEGACY_QUESTION_IDS.map(id => QUESTION_BANK.find(q => q.id === id)!)
 
@@ -295,6 +296,19 @@ blocked=true
 check('存储不可用返回失败而非假成功',saveSession(progress),false)
 check('存储不可用读取不崩溃',loadSession(),null)
 check('内存答案仍可生成正式结果',calculateResult(randomAnswers,randomRound.questionIds,1000)?.total,randomResult.total)
+
+section('【12】结果人物画像')
+check('八个段位均配置本地画像',TIERS.every(t => /^characters\/[a-z]+[.]webp$/.test(t.portrait)),true)
+check('八个段位画像互不重复',new Set(TIERS.map(t => t.portrait)).size,8)
+check('八张画像文件存在',TIERS.every(t => existsSync('public/' + t.portrait)),true)
+check('八张画像均为有效WebP容器',TIERS.every(t => {
+  const bytes=readFileSync('public/' + t.portrait)
+  return bytes.toString('ascii',0,4)==='RIFF' && bytes.toString('ascii',8,12)==='WEBP'
+}),true)
+check('20分到60分的八档画像按顺序匹配',TIERS.map(t => t.portrait),[
+  'characters/pure.webp','characters/tourist.webp','characters/casual.webp','characters/marinated.webp',
+  'characters/cooked.webp','characters/deepfried.webp','characters/fermented.webp','characters/ascended.webp',
+])
 
 // ---------------------------------------------------------------- 汇总
 console.log(`\n${'='.repeat(46)}`)
